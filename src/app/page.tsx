@@ -45,6 +45,12 @@ export default function Home() {
           <h1 className="text-3xl font-bold text-white">🇹🇼 Learn Chinese</h1>
           <div className="space-x-4">
             <Link
+              href="/vocabulary"
+              className="text-white hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-lg transition"
+            >
+              📚 My Words
+            </Link>
+            <Link
               href="/progress"
               className="text-white hover:bg-white hover:bg-opacity-20 px-4 py-2 rounded-lg transition"
             >
@@ -99,6 +105,23 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Vocabulary Section */}
+        <div className="mt-12 card bg-gradient-to-r from-green-400 to-blue-500 text-white">
+          <h3 className="text-3xl font-bold mb-3">
+            📚 Create Your Custom Vocabulary
+          </h3>
+          <p className="text-lg mb-6">
+            Add words YOU want to learn! Build your personal vocabulary list
+            with meanings, pronunciations, and examples.
+          </p>
+          <Link
+            href="/vocabulary"
+            className="inline-block bg-white text-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition"
+          >
+            Manage My Words
+          </Link>
         </div>
 
         {/* Features Section */}
