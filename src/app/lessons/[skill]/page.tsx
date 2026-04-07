@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { PronunciationPlayer } from "@/lib/pronunciation";
 
 interface LessonData {
   id: string;
@@ -111,6 +112,7 @@ export default function LessonsPage({
   const [skill, setSkill] = useState<string>("");
   const [selectedLesson, setSelectedLesson] = useState<LessonData | null>(null);
   const [completed, setCompleted] = useState<Set<string>>(new Set());
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   // Handle async params
   resolvedParams.then((p) => {
@@ -131,6 +133,16 @@ export default function LessonsPage({
 
   const handleCompleteLesson = (lessonId: string) => {
     setCompleted((prev) => new Set([...prev, lessonId]));
+  };
+
+  const handlePlayAudio = (audioKey: string, text: string) => {
+    if (playingAudio === audioKey) {
+      PronunciationPlayer.stopSpeaking();
+      setPlayingAudio(null);
+    } else {
+      PronunciationPlayer.speak(text, "zh-CN");
+      setPlayingAudio(audioKey);
+    }
   };
 
   return (
@@ -192,8 +204,28 @@ export default function LessonsPage({
                   <div className="text-2xl text-purple-600 font-semibold mb-2">
                     {selectedLesson.pinyin}
                   </div>
-                  <div className="text-xl text-gray-600">
+                  <div className="text-xl text-gray-600 mb-4">
                     {selectedLesson.meaning}
+                  </div>
+                  {/* Quick Audio Buttons */}
+                  <div className="flex gap-3 justify-center">
+                    <button
+                      onClick={() =>
+                        handlePlayAudio(
+                          `quick-listen-${selectedLesson.id}`,
+                          selectedLesson.chinese,
+                        )
+                      }
+                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                        playingAudio === `quick-listen-${selectedLesson.id}`
+                          ? "bg-red-500 text-white"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                    >
+                      {playingAudio === `quick-listen-${selectedLesson.id}`
+                        ? "⏹️"
+                        : "🔊"}
+                    </button>
                   </div>
                 </div>
 
@@ -212,11 +244,43 @@ export default function LessonsPage({
 
                 {/* Interactive Elements */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                  <button className="btn btn-primary">🎵 Listen</button>
+                  <button
+                    onClick={() =>
+                      handlePlayAudio(
+                        `listen-${selectedLesson.id}`,
+                        selectedLesson.chinese,
+                      )
+                    }
+                    className={`py-3 rounded-lg font-semibold transition ${
+                      playingAudio === `listen-${selectedLesson.id}`
+                        ? "bg-red-600 text-white"
+                        : "bg-blue-600 text-white hover:bg-blue-700"
+                    }`}
+                  >
+                    {playingAudio === `listen-${selectedLesson.id}`
+                      ? "⏹️ Stop Listen"
+                      : "🎵 Listen"}
+                  </button>
+                  <button
+                    onClick={() =>
+                      handlePlayAudio(
+                        `speak-${selectedLesson.id}`,
+                        selectedLesson.chinese,
+                      )
+                    }
+                    className={`py-3 rounded-lg font-semibold transition ${
+                      playingAudio === `speak-${selectedLesson.id}`
+                        ? "bg-red-600 text-white"
+                        : "bg-purple-600 text-white hover:bg-purple-700"
+                    }`}
+                  >
+                    {playingAudio === `speak-${selectedLesson.id}`
+                      ? "⏹️ Stop Speaking"
+                      : "🗣️ Speak"}
+                  </button>
                   <button className="btn btn-secondary">
                     📝 Practice Writing
                   </button>
-                  <button className="btn btn-primary">🗣️ Speak</button>
                   <button className="btn btn-secondary">
                     📚 More Examples
                   </button>

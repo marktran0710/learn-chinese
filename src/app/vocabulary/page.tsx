@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { PronunciationPlayer } from "@/lib/pronunciation";
 
 interface CustomWord {
   id: string;
@@ -22,6 +23,7 @@ export default function VocabularyPage() {
   });
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   // Load words from localStorage
   useEffect(() => {
@@ -70,6 +72,16 @@ export default function VocabularyPage() {
   const handleDeleteWord = (id: string) => {
     const updatedWords = words.filter((word) => word.id !== id);
     saveToLocalStorage(updatedWords);
+  };
+
+  const handlePlayPronunciation = (wordId: string, chinese: string) => {
+    if (playingId === wordId) {
+      PronunciationPlayer.stopSpeaking();
+      setPlayingId(null);
+    } else {
+      PronunciationPlayer.speak(chinese, "zh-CN");
+      setPlayingId(wordId);
+    }
   };
 
   if (loading) {
@@ -234,6 +246,33 @@ export default function VocabularyPage() {
                       </p>
                     </div>
                   )}
+
+                  {/* Audio Buttons */}
+                  <div className="grid grid-cols-2 gap-2 mb-3">
+                    <button
+                      onClick={() =>
+                        handlePlayPronunciation(word.id, word.chinese)
+                      }
+                      className={`py-2 px-3 rounded-lg font-semibold transition ${
+                        playingId === word.id
+                          ? "bg-red-500 text-white"
+                          : "bg-blue-500 text-white hover:bg-blue-600"
+                      }`}
+                    >
+                      {playingId === word.id ? "⏹️ Stop" : "🔊 Listen"}
+                    </button>
+                    <button
+                      onClick={() =>
+                        handlePlayPronunciation(
+                          word.id + "-pinyin",
+                          word.pinyin,
+                        )
+                      }
+                      className="py-2 px-3 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition"
+                    >
+                      🗣️ Speak
+                    </button>
+                  </div>
 
                   {/* Metadata */}
                   <div className="text-xs text-gray-500">
