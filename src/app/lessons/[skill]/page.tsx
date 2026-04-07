@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PronunciationPlayer } from "@/lib/pronunciation";
+import {
+  addCompletedLesson,
+  loadCompletedLessons,
+  saveLastActiveSkill,
+} from "@/lib/storage";
 
 interface LessonData {
   id: string;
@@ -114,12 +119,27 @@ export default function LessonsPage({
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
-  // Handle async params
-  resolvedParams.then((p) => {
-    if (skill !== p.skill) {
-      setSkill(p.skill);
+  useEffect(() => {
+    const storedLessons = loadCompletedLessons();
+    setCompleted(new Set(storedLessons));
+  }, []);
+
+  useEffect(() => {
+    resolvedParams.then((p) => {
+      if (skill !== p.skill) {
+        setSkill(p.skill);
+      }
+    });
+  }, [resolvedParams, skill]);
+
+  useEffect(() => {
+    if (!skill) return;
+    saveLastActiveSkill(skill);
+    const currentLessons = lessonsData[skill] || [];
+    if (currentLessons.length > 0) {
+      setSelectedLesson(currentLessons[0]);
     }
-  });
+  }, [skill]);
 
   const skillTitles: Record<string, string> = {
     reading: "📖 Reading",
@@ -131,8 +151,16 @@ export default function LessonsPage({
   const lessons = lessonsData[skill] || [];
   const skillTitle = skillTitles[skill] || "Learning";
 
+  const getCompletionKey = (lessonId: string) => `${skill}-${lessonId}`;
+
   const handleCompleteLesson = (lessonId: string) => {
-    setCompleted((prev) => new Set([...prev, lessonId]));
+    const completionKey = getCompletionKey(lessonId);
+    const updated = addCompletedLesson(completionKey);
+    setCompleted(new Set(updated));
+  };
+
+  const isCompleted = (lessonId: string) => {
+    return completed.has(getCompletionKey(lessonId));
   };
 
   const handlePlayAudio = (audioKey: string, text: string) => {
@@ -174,7 +202,7 @@ export default function LessonsPage({
                       selectedLesson?.id === lesson.id
                         ? "bg-blue-600 text-white"
                         : "bg-gray-100 hover:bg-gray-200"
-                    } ${completed.has(lesson.id) ? "border-l-4 border-green-500" : ""}`}
+                    } ${isCompleted(lesson.id) ? "border-l-4 border-green-500" : ""}`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-semibold">{lesson.title}</span>

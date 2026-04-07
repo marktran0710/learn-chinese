@@ -1,36 +1,72 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { ProgressBar } from "@/components/ProgressBar";
+import { loadCompletedLessons, loadCustomWords } from "@/lib/storage";
 
 export default function ProgressPage() {
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [wordCount, setWordCount] = useState(0);
+
+  useEffect(() => {
+    const lessons = loadCompletedLessons();
+    setCompletedLessons(lessons);
+    setWordCount(loadCustomWords().length);
+  }, []);
+
+  const countForSkill = (skill: string, total: number) => {
+    const count = completedLessons.filter((item) =>
+      item.startsWith(`${skill}-`),
+    ).length;
+    return {
+      skill,
+      progress: total === 0 ? 0 : Math.round((count / total) * 100),
+      lessons: `${count}/${total}`,
+      streak: `${Math.min(count, 12)} days`,
+    };
+  };
+
   const stats = [
-    { skill: "Reading", progress: 65, lessons: "16/25", streak: "7 days" },
-    { skill: "Writing", progress: 48, lessons: "12/25", streak: "5 days" },
-    { skill: "Listening", progress: 72, lessons: "15/20", streak: "10 days" },
-    { skill: "Speaking", progress: 35, lessons: "7/20", streak: "3 days" },
+    countForSkill("reading", 25),
+    countForSkill("writing", 25),
+    countForSkill("listening", 20),
+    countForSkill("speaking", 20),
   ];
 
+  const totalLessons = completedLessons.length;
+  const xpPoints = totalLessons * 15 + wordCount * 5;
   const achievements = [
     {
       icon: "🌟",
       title: "First Step",
-      description: "Complete your first lesson",
+      description:
+        totalLessons > 0
+          ? "You completed your first lesson"
+          : "Complete your first lesson",
     },
     {
       icon: "🔥",
       title: "5-Day Streak",
-      description: "Practice for 5 consecutive days",
+      description:
+        totalLessons >= 5
+          ? "Practice for 5 consecutive days"
+          : "Complete 5 lessons to unlock",
     },
     {
       icon: "⭐",
       title: "Speed Reader",
-      description: "Complete 10 reading lessons",
+      description:
+        stats[0].progress >= 40
+          ? "Complete 10 reading lessons"
+          : "Finish more reading lessons",
     },
     {
       icon: "🎯",
       title: "All-Rounder",
-      description: "Complete lessons in all 4 skills",
+      description: stats.every((item) => item.progress >= 20)
+        ? "Complete lessons in all 4 skills"
+        : "Try every skill to unlock",
     },
   ];
 
@@ -49,19 +85,29 @@ export default function ProgressPage() {
         {/* Overall Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <div className="card text-center">
-            <div className="text-4xl font-bold text-blue-600">55</div>
+            <div className="text-4xl font-bold text-blue-600">
+              {totalLessons}
+            </div>
             <p className="text-gray-600">Lessons Completed</p>
           </div>
           <div className="card text-center">
-            <div className="text-4xl font-bold text-purple-600">7</div>
+            <div className="text-4xl font-bold text-purple-600">
+              {Math.min(totalLessons, 30)}
+            </div>
             <p className="text-gray-600">Day Streak</p>
           </div>
           <div className="card text-center">
-            <div className="text-4xl font-bold text-pink-600">1250</div>
+            <div className="text-4xl font-bold text-pink-600">{xpPoints}</div>
             <p className="text-gray-600">XP Points</p>
           </div>
           <div className="card text-center">
-            <div className="text-4xl font-bold text-green-600">3</div>
+            <div className="text-4xl font-bold text-green-600">
+              {
+                achievements.filter(
+                  (item) => item.description.includes("unlock") === false,
+                ).length
+              }
+            </div>
             <p className="text-gray-600">Achievements</p>
           </div>
         </div>

@@ -1,10 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+  loadCompletedLessons,
+  loadCustomWords,
+  loadLastActiveSkill,
+} from "@/lib/storage";
 
 export default function Home() {
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
+  const [completedLessons, setCompletedLessons] = useState<string[]>([]);
+  const [wordCount, setWordCount] = useState(0);
+  const [lastSkill, setLastSkill] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCompletedLessons(loadCompletedLessons());
+    setWordCount(loadCustomWords().length);
+    setLastSkill(loadLastActiveSkill());
+  }, []);
 
   const skills = [
     {
@@ -75,9 +89,19 @@ export default function Home() {
           Learn through 4 essential skills: Reading, Writing, Listening, and
           Speaking. Interactive lessons designed for every level.
         </p>
-        <button className="btn btn-primary text-lg mb-12">
-          Get Started Now
-        </button>
+        <div className="mb-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <div className="text-white text-lg">
+            <div>📘 Completed lessons: {completedLessons.length}</div>
+            <div>✍️ Saved words: {wordCount}</div>
+            {lastSkill && <div>🔁 Last activity: {lastSkill} lessons</div>}
+          </div>
+          <Link
+            href={lastSkill ? `/lessons/${lastSkill}` : "/lessons/reading"}
+            className="btn btn-primary text-lg"
+          >
+            {lastSkill ? "Continue Learning" : "Get Started Now"}
+          </Link>
+        </div>
 
         {/* Skills Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
