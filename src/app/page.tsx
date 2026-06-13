@@ -110,6 +110,12 @@ export default function Home() {
               📝 My Words
             </Link>
             <Link
+              href="/import"
+              className="text-white hover:bg-white/20 px-3 py-2 rounded-lg transition text-sm"
+            >
+              📥 Import
+            </Link>
+            <Link
               href="/progress"
               className="text-white hover:bg-white/20 px-3 py-2 rounded-lg transition text-sm"
             >
@@ -213,9 +219,17 @@ export default function Home() {
             href="/vocabulary"
             className="bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl p-4 text-center text-white transition"
           >
-            <div className="text-3xl mb-1">➕</div>
+            <div className="text-3xl mb-1">📝</div>
             <div className="font-bold">My Words</div>
             <div className="text-xs text-white/70">{wordCount} saved</div>
+          </Link>
+          <Link
+            href="/import"
+            className="bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl p-4 text-center text-white transition"
+          >
+            <div className="text-3xl mb-1">📥</div>
+            <div className="font-bold">Import</div>
+            <div className="text-xs text-white/70">TXT · CSV · Excel</div>
           </Link>
           <Link
             href="/pretest"

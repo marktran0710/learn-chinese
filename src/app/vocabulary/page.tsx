@@ -105,14 +105,22 @@ export default function VocabularyPage() {
           ← Back to Home
         </Link>
 
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
           <h1 className="text-5xl font-bold text-white">📚 My Vocabulary</h1>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="btn btn-primary text-lg"
-          >
-            {showForm ? "✕ Cancel" : "+ Add Word"}
-          </button>
+          <div className="flex gap-2">
+            <Link
+              href="/import"
+              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl font-medium transition text-sm"
+            >
+              📥 Import File
+            </Link>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="btn btn-primary text-lg"
+            >
+              {showForm ? "✕ Cancel" : "+ Add Word"}
+            </button>
+          </div>
         </div>
 
         {/* Add Word Form */}
