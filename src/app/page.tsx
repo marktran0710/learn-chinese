@@ -116,6 +116,12 @@ export default function Home() {
               📥 Import
             </Link>
             <Link
+              href="/video-listening"
+              className="text-white hover:bg-white/20 px-3 py-2 rounded-lg transition text-sm"
+            >
+              🎬 Videos
+            </Link>
+            <Link
               href="/progress"
               className="text-white hover:bg-white/20 px-3 py-2 rounded-lg transition text-sm"
             >
@@ -276,6 +282,32 @@ export default function Home() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Video Listening */}
+        <div className="bg-white/15 backdrop-blur rounded-2xl p-5 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">🎬 Video Listening</h3>
+            <Link href="/video-listening" className="text-white/70 hover:text-white text-sm underline">
+              See all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <Link href="/video-listening" className="bg-gradient-to-r from-orange-400 to-red-500 rounded-xl p-4 flex items-center gap-3 hover:opacity-90 transition">
+              <span className="text-3xl">🏠</span>
+              <div>
+                <p className="text-white font-bold">我們這一家</p>
+                <p className="text-white/70 text-xs">Our Family · Level A2–B1</p>
+              </div>
+            </Link>
+            <Link href="/video-listening" className="bg-gradient-to-r from-pink-400 to-rose-500 rounded-xl p-4 flex items-center gap-3 hover:opacity-90 transition">
+              <span className="text-3xl">🎀</span>
+              <div>
+                <p className="text-white font-bold">小丸子</p>
+                <p className="text-white/70 text-xs">Chibi Maruko-chan · Level A1–A2</p>
+              </div>
+            </Link>
+          </div>
         </div>
 
         {/* 時代華語 Book Units */}
