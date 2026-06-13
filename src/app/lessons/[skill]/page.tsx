@@ -18,6 +18,23 @@ import {
   LEVEL_DESCRIPTIONS,
 } from "@/data/vocabulary";
 import type { VocabEntry, HSKLevel } from "@/data/vocabulary";
+import { SHIDAI_UNITS, getWordsByUnit } from "@/data/shidaiVocab";
+import type { BookWord } from "@/data/shidaiVocab";
+
+// Converts a BookWord to a VocabEntry shape for reuse in exercise components
+function bookWordToVocabEntry(w: BookWord): VocabEntry {
+  return {
+    id: `book-${w.id}`,
+    level: "A1",
+    traditional: w.traditional,
+    pinyin: w.pinyin,
+    meaning: w.meaning,
+    partOfSpeech: w.partOfSpeech as VocabEntry["partOfSpeech"],
+    example: w.example,
+    exampleTranslation: w.exampleEn,
+    tags: ["時代華語"],
+  };
+}
 
 type SkillMode = "browse" | "exercise";
 
@@ -460,6 +477,8 @@ export default function LessonsPage({
   const [exerciseScore, setExerciseScore] = useState<number | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [userLevel, setUserLevel] = useState<HSKLevel | null>(null);
+  const [source, setSource] = useState<"tocfl" | "book">("tocfl");
+  const [selectedUnit, setSelectedUnit] = useState(1);
 
   useEffect(() => {
     const stored = loadCompletedLessons();
@@ -470,6 +489,13 @@ export default function LessonsPage({
       setUserLevel(profile.level);
       setSelectedLevel(profile.level);
     }
+    // Read URL params for deep-link from home page
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("source") === "book") {
+      setSource("book");
+      const unit = parseInt(params.get("unit") ?? "1", 10);
+      if (unit >= 1 && unit <= 14) setSelectedUnit(unit);
+    }
   }, [skill]);
 
   const levels = getAllLevels();
@@ -478,8 +504,11 @@ export default function LessonsPage({
     completed.has(`${skill}-${v.id}`)
   ).length;
 
+  const bookWords = getWordsByUnit(selectedUnit).map(bookWordToVocabEntry);
+  const vocabPool = source === "book" ? bookWords : vocabForLevel;
+
   function startExercise() {
-    const pool = shuffle(vocabForLevel).slice(0, 10);
+    const pool = shuffle(vocabPool).slice(0, 10);
     setExerciseVocab(pool);
     setExerciseScore(null);
     setMode("exercise");
@@ -534,68 +563,134 @@ export default function LessonsPage({
           </div>
         </div>
 
-        {/* Level Tabs */}
-        <div className="flex gap-2 flex-wrap mb-6">
-          {levels.map((lvl) => {
-            const lvlVocab = getVocabByLevel(lvl);
-            const done = lvlVocab.filter((v) =>
-              completed.has(`${skill}-${v.id}`)
-            ).length;
-            return (
-              <button
-                key={lvl}
-                onClick={() => { setSelectedLevel(lvl); setMode("browse"); setExerciseScore(null); }}
-                className={`px-4 py-2 rounded-xl font-bold text-sm transition ${
-                  selectedLevel === lvl
-                    ? `${LEVEL_BADGE[lvl]} text-white shadow-lg`
-                    : "bg-white/20 text-white hover:bg-white/30"
-                }`}
-              >
-                {lvl}
-                {userLevel === lvl && " ★"}
-                {done > 0 && (
-                  <span className="ml-1 text-xs opacity-80">({done}/{lvlVocab.length})</span>
-                )}
-              </button>
-            );
-          })}
+        {/* Source Toggle */}
+        <div className="flex gap-2 mb-5">
+          <button
+            onClick={() => { setSource("tocfl"); setMode("browse"); setExerciseScore(null); }}
+            className={`px-5 py-2 rounded-xl font-bold text-sm transition ${source === "tocfl" ? "bg-white text-gray-800 shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}
+          >
+            📊 TOCFL Levels
+          </button>
+          <button
+            onClick={() => { setSource("book"); setMode("browse"); setExerciseScore(null); }}
+            className={`px-5 py-2 rounded-xl font-bold text-sm transition ${source === "book" ? "bg-white text-gray-800 shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}
+          >
+            📖 時代華語 Book 1
+          </button>
         </div>
 
-        {/* Level Info + Start Exercise */}
-        <div className="bg-white/15 backdrop-blur rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-full ${LEVEL_BADGE[selectedLevel]}`}>
-              {selectedLevel}
-            </span>
-            <span className="text-white/80 text-sm ml-3">
-              {LEVEL_DESCRIPTIONS[selectedLevel]}
-            </span>
-            <div className="text-white/60 text-xs mt-1">
-              {completedInLevel}/{vocabForLevel.length} practiced in {skill}
+        {source === "tocfl" ? (
+          <>
+            {/* Level Tabs */}
+            <div className="flex gap-2 flex-wrap mb-6">
+              {levels.map((lvl) => {
+                const lvlVocab = getVocabByLevel(lvl);
+                const done = lvlVocab.filter((v) =>
+                  completed.has(`${skill}-${v.id}`)
+                ).length;
+                return (
+                  <button
+                    key={lvl}
+                    onClick={() => { setSelectedLevel(lvl); setMode("browse"); setExerciseScore(null); }}
+                    className={`px-4 py-2 rounded-xl font-bold text-sm transition ${
+                      selectedLevel === lvl
+                        ? `${LEVEL_BADGE[lvl]} text-white shadow-lg`
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    {lvl}
+                    {userLevel === lvl && " ★"}
+                    {done > 0 && (
+                      <span className="ml-1 text-xs opacity-80">({done}/{lvlVocab.length})</span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
-          </div>
-          {mode === "browse" && (
-            <button
-              onClick={startExercise}
-              className="bg-white text-gray-800 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition text-sm"
-            >
-              🎯 Start {meta.exerciseLabel}
-            </button>
-          )}
-          {mode === "exercise" && exerciseScore === null && (
-            <button
-              onClick={() => setMode("browse")}
-              className="bg-white/30 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/40 transition"
-            >
-              ← Back to Browse
-            </button>
-          )}
-        </div>
+
+            {/* Level Info */}
+            <div className="bg-white/15 backdrop-blur rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-full ${LEVEL_BADGE[selectedLevel]}`}>
+                  {selectedLevel}
+                </span>
+                <span className="text-white/80 text-sm ml-3">
+                  {LEVEL_DESCRIPTIONS[selectedLevel]}
+                </span>
+                <div className="text-white/60 text-xs mt-1">
+                  {completedInLevel}/{vocabForLevel.length} practiced in {skill}
+                </div>
+              </div>
+              {mode === "browse" && (
+                <button onClick={startExercise} className="bg-white text-gray-800 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition text-sm">
+                  🎯 Start {meta.exerciseLabel}
+                </button>
+              )}
+              {mode === "exercise" && exerciseScore === null && (
+                <button onClick={() => setMode("browse")} className="bg-white/30 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/40 transition">
+                  ← Back to Browse
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Unit Tabs */}
+            <div className="flex gap-2 flex-wrap mb-6">
+              {SHIDAI_UNITS.map((u) => {
+                const done = getWordsByUnit(u.unit).filter((w) =>
+                  completed.has(`${skill}-book-${w.id}`)
+                ).length;
+                return (
+                  <button
+                    key={u.unit}
+                    onClick={() => { setSelectedUnit(u.unit); setMode("browse"); setExerciseScore(null); }}
+                    className={`px-4 py-2 rounded-xl font-bold text-sm transition ${
+                      selectedUnit === u.unit
+                        ? "bg-yellow-400 text-gray-900 shadow-lg"
+                        : "bg-white/20 text-white hover:bg-white/30"
+                    }`}
+                  >
+                    L{u.unit}
+                    {done > 0 && (
+                      <span className="ml-1 text-xs opacity-80">({done}/{getWordsByUnit(u.unit).length})</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Unit Info */}
+            <div className="bg-white/15 backdrop-blur rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full bg-yellow-500">
+                  Lesson {selectedUnit}
+                </span>
+                <span className="text-white/80 text-sm ml-3">
+                  {SHIDAI_UNITS.find((u) => u.unit === selectedUnit)?.titleZh} — {SHIDAI_UNITS.find((u) => u.unit === selectedUnit)?.titleEn}
+                </span>
+                <div className="text-white/60 text-xs mt-1">
+                  {bookWords.length} words in this lesson
+                </div>
+              </div>
+              {mode === "browse" && bookWords.length >= 4 && (
+                <button onClick={startExercise} className="bg-white text-gray-800 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition text-sm">
+                  🎯 Start {meta.exerciseLabel}
+                </button>
+              )}
+              {mode === "exercise" && exerciseScore === null && (
+                <button onClick={() => setMode("browse")} className="bg-white/30 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/40 transition">
+                  ← Back to Browse
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Content */}
         {mode === "browse" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {vocabForLevel.map((vocab) => {
+            {vocabPool.map((vocab) => {
               const isDone = completed.has(`${skill}-${vocab.id}`);
               return (
                 <div
@@ -606,9 +701,13 @@ export default function LessonsPage({
                 >
                   <div className="flex items-start justify-between mb-2">
                     <span
-                      className={`text-xs font-bold px-2 py-0.5 rounded-full ${LEVEL_COLORS[vocab.level]}`}
+                      className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                        source === "book"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : LEVEL_COLORS[vocab.level]
+                      }`}
                     >
-                      {vocab.level}
+                      {source === "book" ? `L${selectedUnit}` : vocab.level}
                     </span>
                     {isDone && (
                       <span className="text-green-500 font-bold text-xs">✓ Done</span>

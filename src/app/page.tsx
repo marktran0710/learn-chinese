@@ -11,6 +11,7 @@ import {
 } from "@/lib/storage";
 import type { HSKLevel } from "@/data/vocabulary";
 import { LEVEL_DESCRIPTIONS, TOCFL_VOCAB } from "@/data/vocabulary";
+import { SHIDAI_UNITS } from "@/data/shidaiVocab";
 
 const LEVEL_COLORS: Record<HSKLevel, string> = {
   A1: "from-green-400 to-green-600",
@@ -261,6 +262,38 @@ export default function Home() {
               </Link>
             );
           })}
+        </div>
+
+        {/* 時代華語 Book Units */}
+        <div className="bg-white/15 backdrop-blur rounded-2xl p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-bold text-white">📖 時代華語 Book 1 — Units</h3>
+            <span className="text-white/60 text-sm">{SHIDAI_UNITS.length} lessons</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2">
+            {SHIDAI_UNITS.map((u) => (
+              <Link
+                key={u.unit}
+                href={`/lessons/reading?source=book&unit=${u.unit}`}
+                className="bg-white/10 hover:bg-white/20 rounded-xl p-3 text-center transition"
+              >
+                <div className="text-lg font-black text-yellow-300">L{u.unit}</div>
+                <div className="text-white/80 text-xs font-medium leading-tight mt-0.5">{u.titleZh}</div>
+                <div className="text-white/50 text-xs mt-0.5">{u.vocab.length} words</div>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-4 flex gap-2 flex-wrap">
+            {(["reading", "writing", "listening", "speaking"] as const).map((sk) => (
+              <Link
+                key={sk}
+                href={`/lessons/${sk}?source=book&unit=1`}
+                className="bg-white/20 hover:bg-white/30 text-white text-sm px-4 py-2 rounded-xl font-medium transition capitalize"
+              >
+                {sk === "reading" ? "📖" : sk === "writing" ? "✍️" : sk === "listening" ? "👂" : "🗣️"} {sk}
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* TOCFL Level Guide */}
