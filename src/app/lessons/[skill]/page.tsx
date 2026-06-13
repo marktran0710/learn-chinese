@@ -20,6 +20,11 @@ import {
 import type { VocabEntry, HSKLevel } from "@/data/vocabulary";
 import { SHIDAI_UNITS, getWordsByUnit } from "@/data/shidaiVocab";
 import type { BookWord } from "@/data/shidaiVocab";
+import {
+  getPassageByLevel,
+  getPassageByUnit,
+} from "@/data/readingPassages";
+import type { ReadingPassage } from "@/data/readingPassages";
 
 // Converts a BookWord to a VocabEntry shape for reuse in exercise components
 function bookWordToVocabEntry(w: BookWord): VocabEntry {
@@ -86,79 +91,119 @@ function buildOptions(correct: VocabEntry, pool: VocabEntry[]): VocabEntry[] {
   return shuffle([correct, ...distractors]);
 }
 
-// ── Reading Exercise: show character → pick meaning ──────────────────────────
+// ── Reading Exercise: show paragraph → answer comprehension questions ─────────
 function ReadingExercise({
-  vocab,
+  passage,
   skill,
   onComplete,
 }: {
-  vocab: VocabEntry[];
+  passage: ReadingPassage;
   skill: string;
   onComplete: (score: number) => void;
 }) {
-  const [idx, setIdx] = useState(0);
-  const [options, setOptions] = useState<VocabEntry[]>([]);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [phase, setPhase] = useState<"read" | "quiz">("read");
+  const [qIdx, setQIdx] = useState(0);
+  const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
+  const [showPinyin, setShowPinyin] = useState(false);
 
-  const card = vocab[idx];
+  const q = passage.questions[qIdx];
 
-  useEffect(() => {
-    setOptions(buildOptions(card, vocab));
-  }, [idx, card, vocab]);
-
-  function handlePick(picked: VocabEntry) {
-    if (selected) return;
-    setSelected(picked.id);
-    const correct = picked.id === card.id;
-    if (correct) {
-      setScore((s) => s + 1);
-      reviewCard(card.id, 4);
-    } else {
-      reviewCard(card.id, 1);
-    }
-    addCompletedLesson(`${skill}-${card.id}`);
-    addXP(correct ? 10 : 3);
+  function handleAnswer(optIdx: number) {
+    if (selected !== null) return;
+    setSelected(optIdx);
+    const correct = optIdx === q.answer;
+    if (correct) setScore((s) => s + 1);
+    addXP(correct ? 15 : 5);
+    addCompletedLesson(`${skill}-passage-${passage.id}-q${qIdx}`);
     setTimeout(() => {
-      if (idx + 1 >= vocab.length) {
+      if (qIdx + 1 >= passage.questions.length) {
         onComplete(score + (correct ? 1 : 0));
       } else {
-        setIdx((i) => i + 1);
+        setQIdx((i) => i + 1);
         setSelected(null);
       }
-    }, 800);
+    }, 900);
   }
 
+  if (phase === "read") {
+    return (
+      <div>
+        <p className="text-sm text-white/70 mb-3">
+          Read the passage carefully, then answer {passage.questions.length} comprehension questions.
+        </p>
+        <div className="bg-white rounded-2xl p-6 shadow-xl mb-4">
+          <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{passage.title}</h2>
+          <p className="text-2xl leading-relaxed text-gray-800 mb-4">{passage.text}</p>
+          {passage.pinyin && showPinyin && (
+            <p className="text-sm text-purple-500 leading-relaxed mb-3">{passage.pinyin}</p>
+          )}
+          {passage.pinyin && (
+            <button
+              onClick={() => setShowPinyin((v) => !v)}
+              className="text-xs text-blue-400 hover:text-blue-600 mb-3 transition"
+            >
+              {showPinyin ? "Hide pinyin" : "Show pinyin"}
+            </button>
+          )}
+          <button
+            onClick={() => PronunciationPlayer.speak(passage.text, "zh-TW")}
+            className="block text-sm text-gray-400 hover:text-gray-600 transition mb-4"
+          >
+            🔊 Listen to passage
+          </button>
+          {passage.vocabulary && passage.vocabulary.length > 0 && (
+            <div className="bg-blue-50 rounded-xl p-3 mt-2">
+              <p className="text-xs font-bold text-blue-700 mb-2">Key vocabulary</p>
+              <div className="flex flex-wrap gap-2">
+                {passage.vocabulary.map((v) => (
+                  <span key={v.word} className="bg-white border border-blue-200 rounded-lg px-2 py-1 text-xs text-gray-700">
+                    <span className="font-bold text-blue-800">{v.word}</span> — {v.meaning}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <button
+          onClick={() => setPhase("quiz")}
+          className="w-full bg-white text-blue-700 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition shadow-lg"
+        >
+          I'm ready — Start Questions →
+        </button>
+      </div>
+    );
+  }
+
+  // Quiz phase
   return (
     <div>
       <p className="text-sm text-white/70 mb-3">
-        Question {idx + 1} / {vocab.length} — What does this mean?
+        Question {qIdx + 1} / {passage.questions.length}
       </p>
-      <div className="bg-white rounded-2xl p-8 text-center mb-4 shadow-xl">
-        <div className="text-7xl font-bold text-gray-800 mb-3">{card.traditional}</div>
-        <div className="text-xl text-purple-600">{card.pinyin}</div>
-        <button
-          onClick={() => PronunciationPlayer.speak(card.traditional, "zh-TW")}
-          className="mt-3 text-sm text-gray-400 hover:text-gray-600 transition"
-        >
-          🔊 Hear pronunciation
-        </button>
+      <div className="bg-white rounded-2xl p-6 shadow-xl mb-4">
+        <p className="text-lg font-bold text-gray-800 mb-1">{passage.title}</p>
+        <p className="text-gray-500 text-sm mb-4 leading-relaxed line-clamp-3">{passage.text}</p>
+        <div className="border-t pt-4">
+          <p className="text-xl font-bold text-gray-800 mb-4">{q.question}</p>
+        </div>
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        {options.map((opt) => {
-          let cls = "p-4 rounded-xl font-medium text-left border-2 transition ";
-          if (!selected) {
+      <div className="flex flex-col gap-3">
+        {q.options.map((opt, i) => {
+          let cls = "p-4 rounded-xl font-medium text-left border-2 transition text-base ";
+          if (selected === null) {
             cls += "bg-white border-white hover:border-blue-400 hover:bg-blue-50 text-gray-800";
-          } else if (opt.id === card.id) {
+          } else if (i === q.answer) {
             cls += "bg-green-100 border-green-500 text-green-800";
-          } else if (opt.id === selected) {
+          } else if (i === selected) {
             cls += "bg-red-100 border-red-400 text-red-700";
           } else {
-            cls += "bg-white/50 border-white/30 text-gray-400";
+            cls += "bg-white/60 border-white/30 text-gray-400";
           }
           return (
-            <button key={opt.id} onClick={() => handlePick(opt)} className={cls}>
-              {opt.meaning}
+            <button key={i} onClick={() => handleAnswer(i)} className={cls}>
+              <span className="font-bold mr-2 text-gray-400">{String.fromCharCode(65 + i)}.</span>
+              {opt}
             </button>
           );
         })}
@@ -475,6 +520,7 @@ export default function LessonsPage({
   const [mode, setMode] = useState<SkillMode>("browse");
   const [exerciseVocab, setExerciseVocab] = useState<VocabEntry[]>([]);
   const [exerciseScore, setExerciseScore] = useState<number | null>(null);
+  const [readingPassage, setReadingPassage] = useState<ReadingPassage | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [userLevel, setUserLevel] = useState<HSKLevel | null>(null);
   const [source, setSource] = useState<"tocfl" | "book">("tocfl");
@@ -508,9 +554,17 @@ export default function LessonsPage({
   const vocabPool = source === "book" ? bookWords : vocabForLevel;
 
   function startExercise() {
-    const pool = shuffle(vocabPool).slice(0, 10);
-    setExerciseVocab(pool);
     setExerciseScore(null);
+    if (skill === "reading") {
+      const passage =
+        source === "book"
+          ? getPassageByUnit(selectedUnit)
+          : getPassageByLevel(selectedLevel);
+      setReadingPassage(passage ?? null);
+    } else {
+      const pool = shuffle(vocabPool).slice(0, 10);
+      setExerciseVocab(pool);
+    }
     setMode("exercise");
   }
 
@@ -744,10 +798,23 @@ export default function LessonsPage({
         ) : exerciseScore !== null ? (
           <ScoreScreen
             score={exerciseScore}
-            total={exerciseVocab.length}
+            total={skill === "reading" && readingPassage ? readingPassage.questions.length : exerciseVocab.length}
             skill={skill}
             onRetry={handleRetry}
           />
+        ) : skill === "reading" ? (
+          readingPassage ? (
+            <ReadingExercise
+              passage={readingPassage}
+              skill={skill}
+              onComplete={handleExerciseDone}
+            />
+          ) : (
+            <div className="bg-white rounded-2xl p-8 text-center shadow-xl">
+              <p className="text-gray-500">No reading passage available for this selection.</p>
+              <button onClick={() => setMode("browse")} className="mt-4 text-blue-600 underline">Back to Browse</button>
+            </div>
+          )
         ) : skill === "listening" ? (
           <ListeningExercise
             vocab={exerciseVocab}
@@ -760,14 +827,8 @@ export default function LessonsPage({
             skill={skill}
             onComplete={handleExerciseDone}
           />
-        ) : skill === "writing" ? (
-          <WritingExercise
-            vocab={exerciseVocab}
-            skill={skill}
-            onComplete={handleExerciseDone}
-          />
         ) : (
-          <ReadingExercise
+          <WritingExercise
             vocab={exerciseVocab}
             skill={skill}
             onComplete={handleExerciseDone}
