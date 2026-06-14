@@ -266,49 +266,36 @@ export async function POST(req: NextRequest) {
           send(ctrl, { step: "warn", message: `yt-dlp subtitle download failed: ${e instanceof Error ? e.message : e}` });
         }
 
-        // ── 3. Fallback: youtube-transcript ────────────────────────────────
+        // ── 3–5. Parallel caption fetch: youtube-transcript + Invidious + timedtext ──
         if (!rawLines.length) {
-          send(ctrl, { step: "captions", message: "Trying youtube-transcript…" });
-          const langs = ["zh-TW", "zh-Hant", "zh", "zh-Hans", "zh-CN"];
-          for (const lang of langs) {
-            try {
-              const items = await YoutubeTranscript.fetchTranscript(videoId, { lang });
-              if (items?.length) {
-                rawLines = items.map((i) => ({
-                  start: i.offset / 1000,
-                  end: (i.offset + i.duration) / 1000,
-                  text: i.text.replace(/\n/g, " ").trim(),
-                }));
-                send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "youtube-transcript" });
-                break;
-              }
-            } catch { /* try next */ }
-          }
-        }
+          send(ctrl, { step: "captions", message: "Searching for captions…" });
 
-        // ── 4. Fallback: Invidious public API (bypasses YouTube IP blocking) ──
-        if (!rawLines.length) {
-          send(ctrl, { step: "captions", message: "Trying Invidious API…" });
-          try {
-            rawLines = await fetchCaptionsFromInvidious(videoId);
-            if (rawLines.length) {
-              send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "invidious" });
+          const fetchYoutubeTranscript = async () => {
+            const langs = ["zh-TW", "zh-Hant", "zh", "zh-Hans", "zh-CN"];
+            for (const lang of langs) {
+              try {
+                const items = await YoutubeTranscript.fetchTranscript(videoId, { lang });
+                if (items?.length) {
+                  return items.map((i) => ({
+                    start: i.offset / 1000,
+                    end: (i.offset + i.duration) / 1000,
+                    text: i.text.replace(/\n/g, " ").trim(),
+                  }));
+                }
+              } catch { /* try next */ }
             }
-          } catch (e) {
-            send(ctrl, { step: "warn", message: `Invidious failed: ${e instanceof Error ? e.message : e}` });
-          }
-        }
+            return [];
+          };
 
-        // ── 5. Fallback: YouTube timedtext API (no API key, works serverless) ──
-        if (!rawLines.length) {
-          send(ctrl, { step: "captions", message: "Trying YouTube timedtext API…" });
-          const timedtextLangs = ["zh-TW", "zh-Hant", "zh", "zh-Hans", "zh-CN", "zh-HK"];
-          for (const lang of timedtextLangs) {
-            try {
-              const r = await fetch(
-                `https://www.youtube.com/api/timedtext?lang=${lang}&v=${videoId}&fmt=json3`
-              );
-              if (r.ok) {
+          const fetchTimedtext = async () => {
+            const langs = ["zh-TW", "zh-Hant", "zh", "zh-Hans", "zh-CN", "zh-HK"];
+            for (const lang of langs) {
+              try {
+                const r = await fetch(
+                  `https://www.youtube.com/api/timedtext?lang=${lang}&v=${videoId}&fmt=json3`,
+                  { signal: AbortSignal.timeout(5000) }
+                );
+                if (!r.ok) continue;
                 const data = await r.json() as {
                   events?: Array<{ tStartMs: number; dDurationMs?: number; segs?: Array<{ utf8: string }> }>;
                 };
@@ -320,13 +307,25 @@ export async function POST(req: NextRequest) {
                     text: (e.segs ?? []).map((s) => s.utf8).join("").replace(/\n/g, " ").trim(),
                   }))
                   .filter((l) => l.text && /[一-鿿]/.test(l.text));
-                if (lines.length) {
-                  rawLines = lines;
-                  send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "timedtext" });
-                  break;
-                }
-              }
-            } catch { /* try next lang */ }
+                if (lines.length) return lines;
+              } catch { /* try next */ }
+            }
+            return [];
+          };
+
+          // Race all three in parallel — first non-empty result wins
+          const results = await Promise.allSettled([
+            fetchYoutubeTranscript(),
+            fetchCaptionsFromInvidious(videoId),
+            fetchTimedtext(),
+          ]);
+
+          for (const r of results) {
+            if (r.status === "fulfilled" && r.value.length > 0) {
+              rawLines = r.value;
+              send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "parallel" });
+              break;
+            }
           }
         }
 
