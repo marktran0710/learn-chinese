@@ -45,6 +45,77 @@ async function translateBatch(texts: string[]): Promise<string[]> {
   return results;
 }
 
+// Fetch captions by scraping YouTube page for caption track URLs (no binary needed)
+async function fetchCaptionsFromPage(
+  videoId: string
+): Promise<Array<{ start: number; end: number; text: string }>> {
+  const HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+    "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
+  };
+
+  const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, { headers: HEADERS });
+  const html = await pageRes.text();
+
+  // Extract ytInitialPlayerResponse JSON
+  const match = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});(?:\s*(?:var|const|let)\s|\s*<\/script>)/s);
+  if (!match) return [];
+
+  let playerResponse: Record<string, unknown>;
+  try { playerResponse = JSON.parse(match[1]); } catch { return []; }
+
+  type CaptionTrack = { baseUrl: string; languageCode: string; kind?: string };
+  const tracks: CaptionTrack[] =
+    (playerResponse?.captions as { playerCaptionsTracklistRenderer?: { captionTracks?: CaptionTrack[] } })
+      ?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
+
+  if (!tracks.length) return [];
+
+  // Prefer Traditional Chinese, then Simplified, then any Chinese auto-caption
+  const priority = ["zh-TW", "zh-Hant", "zh-HK", "zh", "zh-Hans", "zh-CN"];
+  const sorted = [...tracks].sort((a, b) => {
+    const ai = priority.findIndex((p) => a.languageCode.startsWith(p));
+    const bi = priority.findIndex((p) => b.languageCode.startsWith(p));
+    // prefer manual over auto (asr)
+    const aScore = (ai === -1 ? 99 : ai) + (a.kind === "asr" ? 0.5 : 0);
+    const bScore = (bi === -1 ? 99 : bi) + (b.kind === "asr" ? 0.5 : 0);
+    return aScore - bScore;
+  });
+
+  // Filter to Chinese only
+  const chineseTracks = sorted.filter((t) =>
+    priority.some((p) => t.languageCode.startsWith(p))
+  );
+  if (!chineseTracks.length) return [];
+
+  // Fetch the best track as XML
+  const track = chineseTracks[0];
+  const xmlRes = await fetch(track.baseUrl + "&fmt=xml", { headers: HEADERS });
+  if (!xmlRes.ok) return [];
+  const xml = await xmlRes.text();
+
+  // Parse <text start="..." dur="...">...</text>
+  const entries: Array<{ start: number; end: number; text: string }> = [];
+  const re = /<text\s+start="([^"]+)"\s+dur="([^"]+)"[^>]*>([\s\S]*?)<\/text>/g;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    const start = parseFloat(m[1]);
+    const dur = parseFloat(m[2]);
+    const text = m[3]
+      .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+      .replace(/<[^>]+>/g, "").trim();
+    if (text) entries.push({ start, end: start + dur, text });
+  }
+
+  // Deduplicate
+  const deduped: typeof entries = [];
+  for (const e of entries) {
+    if (!deduped.length || deduped[deduped.length - 1].text !== e.text) deduped.push(e);
+  }
+  return deduped;
+}
+
 // Parse VTT subtitle file → timed lines
 function parseVtt(content: string): Array<{ start: number; end: number; text: string }> {
   const lines: Array<{ start: number; end: number; text: string }> = [];
@@ -224,7 +295,20 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // ── 4. Fallback: YouTube timedtext API (no API key, works serverless) ──
+        // ── 4. Fallback: scrape YouTube page for caption track URL ────────────
+        if (!rawLines.length) {
+          send(ctrl, { step: "captions", message: "Scanning YouTube page for captions…" });
+          try {
+            rawLines = await fetchCaptionsFromPage(videoId);
+            if (rawLines.length) {
+              send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "page-scrape" });
+            }
+          } catch (e) {
+            send(ctrl, { step: "warn", message: `Page scrape failed: ${e instanceof Error ? e.message : e}` });
+          }
+        }
+
+        // ── 5. Fallback: YouTube timedtext API (no API key, works serverless) ──
         if (!rawLines.length) {
           send(ctrl, { step: "captions", message: "Trying YouTube timedtext API…" });
           const timedtextLangs = ["zh-TW", "zh-Hant", "zh", "zh-Hans", "zh-CN", "zh-HK"];
@@ -255,7 +339,7 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // ── 5. Fallback: local Whisper via @xenova/transformers ─────────────
+        // ── 6. Fallback: local Whisper via @xenova/transformers ─────────────
         // Only available when running locally — serverless environments (Vercel etc.)
         // cannot download the 150MB model or sustain long-running CPU work.
         const isServerless = Boolean(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
