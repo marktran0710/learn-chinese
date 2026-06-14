@@ -25,8 +25,9 @@ export async function POST(req: NextRequest) {
     let text = "";
 
     if (ext === "pdf") {
-      const pdfParse = (await import("pdf-parse")).default;
-      const data = await pdfParse(buffer);
+      const pdfParseModule = await import("pdf-parse");
+      const pdfParse = pdfParseModule.default ?? pdfParseModule;
+      const data = await (pdfParse as (b: Buffer) => Promise<{ text: string }>)(buffer);
       text = data.text;
     } else if (ext === "docx" || ext === "doc") {
       const mammoth = await import("mammoth");
