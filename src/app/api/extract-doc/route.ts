@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const pdfParse = require("pdf-parse") as (buf: Buffer) => Promise<{ text: string }>;
 
 export const maxDuration = 60;
 
@@ -25,9 +27,7 @@ export async function POST(req: NextRequest) {
     let text = "";
 
     if (ext === "pdf") {
-      const pdfParseModule = await import("pdf-parse");
-      const pdfParse = pdfParseModule.default ?? pdfParseModule;
-      const data = await (pdfParse as (b: Buffer) => Promise<{ text: string }>)(buffer);
+      const data = await pdfParse(buffer);
       text = data.text;
     } else if (ext === "docx" || ext === "doc") {
       const mammoth = await import("mammoth");
