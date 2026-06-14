@@ -45,75 +45,66 @@ async function translateBatch(texts: string[]): Promise<string[]> {
   return results;
 }
 
-// Fetch captions by scraping YouTube page for caption track URLs (no binary needed)
-async function fetchCaptionsFromPage(
-  videoId: string
-): Promise<Array<{ start: number; end: number; text: string }>> {
-  const HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
-    "Accept-Language": "zh-TW,zh;q=0.9,en;q=0.8",
-  };
+type CaptionLine = { start: number; end: number; text: string };
 
-  const pageRes = await fetch(`https://www.youtube.com/watch?v=${videoId}`, { headers: HEADERS });
-  const html = await pageRes.text();
-
-  // Extract ytInitialPlayerResponse JSON
-  const match = html.match(/ytInitialPlayerResponse\s*=\s*(\{.+?\});(?:\s*(?:var|const|let)\s|\s*<\/script>)/s);
-  if (!match) return [];
-
-  let playerResponse: Record<string, unknown>;
-  try { playerResponse = JSON.parse(match[1]); } catch { return []; }
-
-  type CaptionTrack = { baseUrl: string; languageCode: string; kind?: string };
-  const tracks: CaptionTrack[] =
-    (playerResponse?.captions as { playerCaptionsTracklistRenderer?: { captionTracks?: CaptionTrack[] } })
-      ?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
-
-  if (!tracks.length) return [];
-
-  // Prefer Traditional Chinese, then Simplified, then any Chinese auto-caption
-  const priority = ["zh-TW", "zh-Hant", "zh-HK", "zh", "zh-Hans", "zh-CN"];
-  const sorted = [...tracks].sort((a, b) => {
-    const ai = priority.findIndex((p) => a.languageCode.startsWith(p));
-    const bi = priority.findIndex((p) => b.languageCode.startsWith(p));
-    // prefer manual over auto (asr)
-    const aScore = (ai === -1 ? 99 : ai) + (a.kind === "asr" ? 0.5 : 0);
-    const bScore = (bi === -1 ? 99 : bi) + (b.kind === "asr" ? 0.5 : 0);
-    return aScore - bScore;
-  });
-
-  // Filter to Chinese only
-  const chineseTracks = sorted.filter((t) =>
-    priority.some((p) => t.languageCode.startsWith(p))
-  );
-  if (!chineseTracks.length) return [];
-
-  // Fetch the best track as XML
-  const track = chineseTracks[0];
-  const xmlRes = await fetch(track.baseUrl + "&fmt=xml", { headers: HEADERS });
-  if (!xmlRes.ok) return [];
-  const xml = await xmlRes.text();
-
-  // Parse <text start="..." dur="...">...</text>
-  const entries: Array<{ start: number; end: number; text: string }> = [];
+// Parse XML caption format: <text start="..." dur="...">...</text>
+function parseCaptionXml(xml: string): CaptionLine[] {
+  const entries: CaptionLine[] = [];
   const re = /<text\s+start="([^"]+)"\s+dur="([^"]+)"[^>]*>([\s\S]*?)<\/text>/g;
   let m;
   while ((m = re.exec(xml)) !== null) {
-    const start = parseFloat(m[1]);
-    const dur = parseFloat(m[2]);
     const text = m[3]
       .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
       .replace(/&quot;/g, '"').replace(/&#39;/g, "'")
       .replace(/<[^>]+>/g, "").trim();
-    if (text) entries.push({ start, end: start + dur, text });
+    if (text) entries.push({ start: parseFloat(m[1]), end: parseFloat(m[1]) + parseFloat(m[2]), text });
   }
-
-  // Deduplicate
-  const deduped: typeof entries = [];
+  const deduped: CaptionLine[] = [];
   for (const e of entries) {
     if (!deduped.length || deduped[deduped.length - 1].text !== e.text) deduped.push(e);
   }
   return deduped;
+}
+
+// Fetch captions via Invidious public API (bypasses YouTube IP blocking on cloud)
+async function fetchCaptionsFromInvidious(videoId: string): Promise<CaptionLine[]> {
+  const INSTANCES = [
+    "https://invidious.snopyta.org",
+    "https://invidious.kavin.rocks",
+    "https://vid.puffyan.us",
+    "https://y.com.sb",
+    "https://inv.bp.projectsegfau.lt",
+  ];
+  const LANGS = ["zh-TW", "zh-Hant", "zh-HK", "zh", "zh-Hans", "zh-CN"];
+
+  for (const instance of INSTANCES) {
+    try {
+      const res = await fetch(`${instance}/api/v1/videos/${videoId}?fields=captions`, {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) continue;
+
+      const data = await res.json() as {
+        captions?: Array<{ label: string; languageCode: string; url: string }>;
+      };
+      const captions = data.captions ?? [];
+
+      // Pick best Chinese caption track
+      let best = captions.find((c) => c.languageCode === "zh-TW" && !c.label.includes("auto"));
+      if (!best) best = captions.find((c) => LANGS.some((l) => c.languageCode.startsWith(l)));
+      if (!best) continue;
+
+      const captionRes = await fetch(`${instance}${best.url}`, {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!captionRes.ok) continue;
+
+      const vttText = await captionRes.text();
+      const lines = parseVtt(vttText);
+      if (lines.length) return lines;
+    } catch { /* try next instance */ }
+  }
+  return [];
 }
 
 // Parse VTT subtitle file → timed lines
@@ -295,16 +286,16 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // ── 4. Fallback: scrape YouTube page for caption track URL ────────────
+        // ── 4. Fallback: Invidious public API (bypasses YouTube IP blocking) ──
         if (!rawLines.length) {
-          send(ctrl, { step: "captions", message: "Scanning YouTube page for captions…" });
+          send(ctrl, { step: "captions", message: "Trying Invidious API…" });
           try {
-            rawLines = await fetchCaptionsFromPage(videoId);
+            rawLines = await fetchCaptionsFromInvidious(videoId);
             if (rawLines.length) {
-              send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "page-scrape" });
+              send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "invidious" });
             }
           } catch (e) {
-            send(ctrl, { step: "warn", message: `Page scrape failed: ${e instanceof Error ? e.message : e}` });
+            send(ctrl, { step: "warn", message: `Invidious failed: ${e instanceof Error ? e.message : e}` });
           }
         }
 
