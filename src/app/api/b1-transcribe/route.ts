@@ -2,23 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
+export const maxDuration = 300; // 5 min for long audio files
+
 export async function POST(req: NextRequest) {
   const { audioFile } = await req.json() as { audioFile: string };
   if (!audioFile || !/^[\w-]+$/.test(audioFile)) {
     return NextResponse.json({ error: "Invalid audioFile" }, { status: 400 });
   }
 
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey || apiKey.startsWith("sk-...")) {
-    return NextResponse.json({ error: "OPENAI_API_KEY not configured" }, { status: 503 });
-  }
-
-  // Return cached transcript if it exists
   const cacheDir = path.join(process.cwd(), "public", "transcripts", "b1");
   const cachePath = path.join(cacheDir, `${audioFile}.json`);
+
+  // Return cached transcript if available
   if (fs.existsSync(cachePath)) {
-    const cached = JSON.parse(fs.readFileSync(cachePath, "utf8"));
-    return NextResponse.json(cached);
+    return NextResponse.json(JSON.parse(fs.readFileSync(cachePath, "utf8")));
   }
 
   const mp3Path = path.join(process.cwd(), "public", "audio", "b1", `${audioFile}.mp3`);
@@ -26,44 +23,53 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Audio file not found" }, { status: 404 });
   }
 
-  // Send to OpenAI Whisper API
-  const formData = new FormData();
-  const fileBuffer = fs.readFileSync(mp3Path);
-  const blob = new Blob([fileBuffer], { type: "audio/mpeg" });
-  formData.append("file", blob, `${audioFile}.mp3`);
-  formData.append("model", "whisper-1");
-  formData.append("language", "zh");
-  formData.append("response_format", "verbose_json");
-  formData.append("timestamp_granularities[]", "segment");
+  try {
+    // Decode MP3 → Float32Array at 16kHz using node-web-audio-api (pure JS/WASM, no ffmpeg)
+    const { AudioContext } = await import("node-web-audio-api") as { AudioContext: new (opts?: { sampleRate?: number }) => AudioContext };
+    const ctx = new AudioContext({ sampleRate: 16000 });
+    const mp3Buffer = fs.readFileSync(mp3Path);
+    const audioBuffer = await ctx.decodeAudioData(mp3Buffer.buffer as ArrayBuffer);
 
-  const resp = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}` },
-    body: formData,
-  });
+    // Mix to mono
+    const mono = new Float32Array(audioBuffer.length);
+    for (let ch = 0; ch < audioBuffer.numberOfChannels; ch++) {
+      const chData = audioBuffer.getChannelData(ch);
+      for (let i = 0; i < mono.length; i++) mono[i] += chData[i];
+    }
+    for (let i = 0; i < mono.length; i++) mono[i] /= audioBuffer.numberOfChannels;
 
-  if (!resp.ok) {
-    const err = await resp.text();
-    return NextResponse.json({ error: `OpenAI error: ${err}` }, { status: 502 });
+    // Run Whisper via @xenova/transformers
+    const { pipeline } = await import("@xenova/transformers");
+    const transcriber = await pipeline(
+      "automatic-speech-recognition",
+      "Xenova/whisper-small",
+      { quantized: true }
+    );
+
+    const output = await transcriber(mono, {
+      language: "chinese",
+      task: "transcribe",
+      chunk_length_s: 30,
+      stride_length_s: 5,
+      return_timestamps: true,
+    }) as { text: string; chunks?: Array<{ timestamp: [number, number | null]; text: string }> };
+
+    const segments = (output.chunks ?? []).map((c) => ({
+      start: c.timestamp[0],
+      end: c.timestamp[1] ?? c.timestamp[0] + 3,
+      text: c.text.trim(),
+    })).filter((s) => s.text);
+
+    const result = { text: output.text.trim(), segments };
+
+    fs.mkdirSync(cacheDir, { recursive: true });
+    fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
+
+    return NextResponse.json(result);
+  } catch (err) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
   }
-
-  const data = await resp.json() as {
-    text: string;
-    segments: Array<{ start: number; end: number; text: string }>;
-  };
-
-  const result = {
-    text: data.text,
-    segments: data.segments.map((s) => ({
-      start: s.start,
-      end: s.end,
-      text: s.text.trim(),
-    })),
-  };
-
-  // Cache to disk
-  fs.mkdirSync(cacheDir, { recursive: true });
-  fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
-
-  return NextResponse.json(result);
 }
