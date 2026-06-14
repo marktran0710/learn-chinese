@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import * as OpenCC from "opencc-js";
 
-export const maxDuration = 300; // 5 min for long audio files
 
 export async function POST(req: NextRequest) {
   const { audioFile } = await req.json() as { audioFile: string };
