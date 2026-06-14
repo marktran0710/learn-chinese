@@ -30,10 +30,88 @@ export type SRSCard = {
 };
 
 const WORDS_KEY = "learnChinese.customWords";
+const VIDEO_IDS_KEY = "learnChinese.videoYoutubeIds";
 const COMPLETED_KEY = "learnChinese.completedLessons";
 const LAST_SKILL_KEY = "learnChinese.lastSkill";
 const PROFILE_KEY = "learnChinese.userProfile";
 const SRS_KEY = "learnChinese.srsCards";
+
+// ── Video YouTube IDs (user-set, overrides data file) ────────────────────────
+export function loadVideoYoutubeIds(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(VIDEO_IDS_KEY) || "{}") as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
+export function saveVideoYoutubeId(episodeId: string, youtubeId: string) {
+  const all = loadVideoYoutubeIds();
+  all[episodeId] = youtubeId;
+  localStorage.setItem(VIDEO_IDS_KEY, JSON.stringify(all));
+}
+
+export function deleteVideoYoutubeId(episodeId: string) {
+  const all = loadVideoYoutubeIds();
+  delete all[episodeId];
+  localStorage.setItem(VIDEO_IDS_KEY, JSON.stringify(all));
+}
+
+// ── Fetched transcripts (keyed by YouTube video ID) ───────────────────────────
+const VIDEO_TRANSCRIPTS_KEY = "learnChinese.videoTranscripts";
+
+export type FetchedTranscriptLine = {
+  start: number;
+  end: number;
+  chinese: string;
+  pinyin: string;
+  english: string;
+};
+
+export function loadFetchedTranscripts(): Record<string, FetchedTranscriptLine[]> {
+  if (typeof window === "undefined") return {};
+  try {
+    return JSON.parse(localStorage.getItem(VIDEO_TRANSCRIPTS_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+export function saveFetchedTranscript(youtubeId: string, lines: FetchedTranscriptLine[]) {
+  const all = loadFetchedTranscripts();
+  all[youtubeId] = lines;
+  localStorage.setItem(VIDEO_TRANSCRIPTS_KEY, JSON.stringify(all));
+}
+
+export function deleteFetchedTranscript(youtubeId: string) {
+  const all = loadFetchedTranscripts();
+  delete all[youtubeId];
+  localStorage.setItem(VIDEO_TRANSCRIPTS_KEY, JSON.stringify(all));
+}
+
+// ── Custom user-added video episodes ─────────────────────────────────────────
+const CUSTOM_EPISODES_KEY = "learnChinese.customEpisodes";
+
+import type { VideoEpisode } from "@/data/videoLessons";
+
+export function loadCustomEpisodes(): VideoEpisode[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(CUSTOM_EPISODES_KEY) || "[]");
+  } catch { return []; }
+}
+
+export function saveCustomEpisode(ep: VideoEpisode) {
+  const all = loadCustomEpisodes().filter((e) => e.id !== ep.id);
+  all.unshift(ep);
+  localStorage.setItem(CUSTOM_EPISODES_KEY, JSON.stringify(all));
+}
+
+export function deleteCustomEpisode(id: string) {
+  const all = loadCustomEpisodes().filter((e) => e.id !== id);
+  localStorage.setItem(CUSTOM_EPISODES_KEY, JSON.stringify(all));
+}
 
 // ── Custom Words ─────────────────────────────────────────────────────────────
 export function loadCustomWords(): CustomWord[] {
