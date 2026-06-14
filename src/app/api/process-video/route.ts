@@ -224,7 +224,38 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // ── 4. Fallback: local Whisper via @xenova/transformers ─────────────
+        // ── 4. Fallback: YouTube timedtext API (no API key, works serverless) ──
+        if (!rawLines.length) {
+          send(ctrl, { step: "captions", message: "Trying YouTube timedtext API…" });
+          const timedtextLangs = ["zh-TW", "zh-Hant", "zh", "zh-Hans", "zh-CN", "zh-HK"];
+          for (const lang of timedtextLangs) {
+            try {
+              const r = await fetch(
+                `https://www.youtube.com/api/timedtext?lang=${lang}&v=${videoId}&fmt=json3`
+              );
+              if (r.ok) {
+                const data = await r.json() as {
+                  events?: Array<{ tStartMs: number; dDurationMs?: number; segs?: Array<{ utf8: string }> }>;
+                };
+                const lines = (data.events ?? [])
+                  .filter((e) => e.segs?.length)
+                  .map((e) => ({
+                    start: e.tStartMs / 1000,
+                    end: (e.tStartMs + (e.dDurationMs ?? 3000)) / 1000,
+                    text: (e.segs ?? []).map((s) => s.utf8).join("").replace(/\n/g, " ").trim(),
+                  }))
+                  .filter((l) => l.text && /[一-鿿]/.test(l.text));
+                if (lines.length) {
+                  rawLines = lines;
+                  send(ctrl, { step: "captions_done", lineCount: rawLines.length, source: "timedtext" });
+                  break;
+                }
+              }
+            } catch { /* try next lang */ }
+          }
+        }
+
+        // ── 5. Fallback: local Whisper via @xenova/transformers ─────────────
         // Only available when running locally — serverless environments (Vercel etc.)
         // cannot download the 150MB model or sustain long-running CPU work.
         const isServerless = Boolean(process.env.VERCEL || process.env.NETLIFY || process.env.AWS_LAMBDA_FUNCTION_NAME);
