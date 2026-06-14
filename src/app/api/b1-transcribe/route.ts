@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import * as OpenCC from "opencc-js";
 
 export const maxDuration = 300; // 5 min for long audio files
 
@@ -54,13 +55,15 @@ export async function POST(req: NextRequest) {
       return_timestamps: true,
     }) as { text: string; chunks?: Array<{ timestamp: [number, number | null]; text: string }> };
 
+    const toTW = OpenCC.Converter({ from: "cn", to: "twp" });
+
     const segments = (output.chunks ?? []).map((c) => ({
       start: c.timestamp[0],
       end: c.timestamp[1] ?? c.timestamp[0] + 3,
-      text: c.text.trim(),
+      text: toTW(c.text.trim()),
     })).filter((s) => s.text);
 
-    const result = { text: output.text.trim(), segments };
+    const result = { text: toTW(output.text.trim()), segments };
 
     fs.mkdirSync(cacheDir, { recursive: true });
     fs.writeFileSync(cachePath, JSON.stringify(result, null, 2), "utf8");
