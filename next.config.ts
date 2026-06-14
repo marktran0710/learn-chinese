@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
-  serverExternalPackages: ["@xenova/transformers", "sharp"],
+  serverExternalPackages: ["@xenova/transformers", "sharp", "pdf-parse"],
   outputFileTracingIncludes: {
     "/api/process-video": ["./node_modules/youtube-dl-exec/bin/**"],
   },
