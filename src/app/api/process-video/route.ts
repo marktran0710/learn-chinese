@@ -245,7 +245,9 @@ export async function POST(req: NextRequest) {
 
             send(ctrl, { step: "transcribing", message: "Running Whisper locally (may take several minutes)…" });
 
-            const { pipeline } = await import("@xenova/transformers");
+            // @xenova/transformers is only available when running locally
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { pipeline } = await import("@xenova/transformers" as any);
             const transcriber = await pipeline(
               "automatic-speech-recognition",
               "Xenova/whisper-small",
