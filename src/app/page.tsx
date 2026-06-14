@@ -122,6 +122,12 @@ export default function Home() {
               🎬 Videos
             </Link>
             <Link
+              href="/b1-book"
+              className="text-white hover:bg-white/20 px-3 py-2 rounded-lg transition text-sm"
+            >
+              📗 B1 Book
+            </Link>
+            <Link
               href="/progress"
               className="text-white hover:bg-white/20 px-3 py-2 rounded-lg transition text-sm"
             >
