@@ -25,8 +25,8 @@ import {
   getPassageByUnit,
 } from "@/data/readingPassages";
 import type { ReadingPassage } from "@/data/readingPassages";
+import { useTheme } from "@/lib/theme";
 
-// Converts a BookWord to a VocabEntry shape for reuse in exercise components
 function bookWordToVocabEntry(w: BookWord): VocabEntry {
   return {
     id: `book-${w.id}`,
@@ -91,7 +91,7 @@ function buildOptions(correct: VocabEntry, pool: VocabEntry[]): VocabEntry[] {
   return shuffle([correct, ...distractors]);
 }
 
-// ── Reading Exercise: show paragraph → answer comprehension questions ─────────
+// ── Reading Exercise ──────────────────────────────────────────────────────────
 function ReadingExercise({
   passage,
   skill,
@@ -129,14 +129,14 @@ function ReadingExercise({
   if (phase === "read") {
     return (
       <div>
-        <p className="text-sm text-white/70 mb-3">
+        <p className="text-sm text-gray-500 dark:text-white/70 mb-3">
           Read the passage carefully, then answer {passage.questions.length} comprehension questions.
         </p>
-        <div className="bg-white rounded-2xl p-6 shadow-xl mb-4">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{passage.title}</h2>
-          <p className="text-2xl leading-relaxed text-gray-800 mb-4">{passage.text}</p>
+        <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 shadow-xl mb-4">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-white/[0.08] pb-2">{passage.title}</h2>
+          <p className="text-2xl leading-relaxed text-gray-800 dark:text-white mb-4">{passage.text}</p>
           {passage.pinyin && showPinyin && (
-            <p className="text-sm text-purple-500 leading-relaxed mb-3">{passage.pinyin}</p>
+            <p className="text-sm text-purple-500 dark:text-purple-400 leading-relaxed mb-3">{passage.pinyin}</p>
           )}
           {passage.pinyin && (
             <button
@@ -148,17 +148,17 @@ function ReadingExercise({
           )}
           <button
             onClick={() => PronunciationPlayer.speak(passage.text, "zh-TW")}
-            className="block text-sm text-gray-400 hover:text-gray-600 transition mb-4"
+            className="block text-sm text-gray-400 hover:text-gray-600 dark:hover:text-white/60 transition mb-4"
           >
             🔊 Listen to passage
           </button>
           {passage.vocabulary && passage.vocabulary.length > 0 && (
-            <div className="bg-blue-50 rounded-xl p-3 mt-2">
-              <p className="text-xs font-bold text-blue-700 mb-2">Key vocabulary</p>
+            <div className="bg-blue-50 dark:bg-blue-500/10 rounded-xl p-3 mt-2">
+              <p className="text-xs font-bold text-blue-700 dark:text-blue-300 mb-2">Key vocabulary</p>
               <div className="flex flex-wrap gap-2">
                 {passage.vocabulary.map((v) => (
-                  <span key={v.word} className="bg-white border border-blue-200 rounded-lg px-2 py-1 text-xs text-gray-700">
-                    <span className="font-bold text-blue-800">{v.word}</span> — {v.meaning}
+                  <span key={v.word} className="bg-white dark:bg-white/[0.06] border border-blue-200 dark:border-blue-500/20 rounded-lg px-2 py-1 text-xs text-gray-700 dark:text-white/80">
+                    <span className="font-bold text-blue-800 dark:text-blue-300">{v.word}</span> — {v.meaning}
                   </span>
                 ))}
               </div>
@@ -167,7 +167,7 @@ function ReadingExercise({
         </div>
         <button
           onClick={() => setPhase("quiz")}
-          className="w-full bg-white text-blue-700 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition shadow-lg"
+          className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg"
         >
           I'm ready — Start Questions →
         </button>
@@ -175,30 +175,29 @@ function ReadingExercise({
     );
   }
 
-  // Quiz phase
   return (
     <div>
-      <p className="text-sm text-white/70 mb-3">
+      <p className="text-sm text-gray-500 dark:text-white/70 mb-3">
         Question {qIdx + 1} / {passage.questions.length}
       </p>
-      <div className="bg-white rounded-2xl p-6 shadow-xl mb-4">
-        <p className="text-lg font-bold text-gray-800 mb-1">{passage.title}</p>
-        <p className="text-gray-500 text-sm mb-4 leading-relaxed line-clamp-3">{passage.text}</p>
-        <div className="border-t pt-4">
-          <p className="text-xl font-bold text-gray-800 mb-4">{q.question}</p>
+      <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 shadow-xl mb-4">
+        <p className="text-lg font-bold text-gray-800 dark:text-white mb-1">{passage.title}</p>
+        <p className="text-gray-500 dark:text-white/50 text-sm mb-4 leading-relaxed line-clamp-3">{passage.text}</p>
+        <div className="border-t border-gray-200 dark:border-white/[0.08] pt-4">
+          <p className="text-xl font-bold text-gray-800 dark:text-white mb-4">{q.question}</p>
         </div>
       </div>
       <div className="flex flex-col gap-3">
         {q.options.map((opt, i) => {
           let cls = "p-4 rounded-xl font-medium text-left border-2 transition text-base ";
           if (selected === null) {
-            cls += "bg-white border-white hover:border-blue-400 hover:bg-blue-50 text-gray-800";
+            cls += "bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/[0.1] hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/20 text-gray-800 dark:text-white";
           } else if (i === q.answer) {
-            cls += "bg-green-100 border-green-500 text-green-800";
+            cls += "bg-green-100 dark:bg-green-500/20 border-green-500 text-green-800 dark:text-green-300";
           } else if (i === selected) {
-            cls += "bg-red-100 border-red-400 text-red-700";
+            cls += "bg-red-100 dark:bg-red-500/20 border-red-400 text-red-700 dark:text-red-300";
           } else {
-            cls += "bg-white/60 border-white/30 text-gray-400";
+            cls += "bg-white/60 dark:bg-white/[0.03] border-gray-200 dark:border-white/[0.05] text-gray-400 dark:text-white/30";
           }
           return (
             <button key={i} onClick={() => handleAnswer(i)} className={cls}>
@@ -212,7 +211,7 @@ function ReadingExercise({
   );
 }
 
-// ── Listening Exercise: hear audio → pick character ──────────────────────────
+// ── Listening Exercise ────────────────────────────────────────────────────────
 function ListeningExercise({
   vocab,
   skill,
@@ -256,21 +255,21 @@ function ListeningExercise({
 
   return (
     <div>
-      <p className="text-sm text-white/70 mb-3">
+      <p className="text-sm text-gray-500 dark:text-white/70 mb-3">
         Question {idx + 1} / {vocab.length} — Listen and choose the correct character
       </p>
-      <div className="bg-white rounded-2xl p-8 text-center mb-4 shadow-xl">
+      <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center mb-4 shadow-xl">
         <button
           onClick={playAudio}
           className={`w-24 h-24 rounded-full text-4xl font-bold transition ${
             played
-              ? "bg-blue-100 text-blue-600"
+              ? "bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-300"
               : "bg-gradient-to-br from-blue-500 to-purple-600 text-white hover:opacity-90 animate-pulse"
           }`}
         >
           🔊
         </button>
-        <p className="text-gray-400 mt-3 text-sm">
+        <p className="text-gray-400 dark:text-white/40 mt-3 text-sm">
           {played ? "Listen again if needed" : "Tap to play audio"}
         </p>
         {!played && (
@@ -282,19 +281,19 @@ function ListeningExercise({
           let cls = "p-4 rounded-xl font-bold text-center border-2 text-2xl transition ";
           if (!selected) {
             cls += played
-              ? "bg-white border-white hover:border-blue-400 hover:bg-blue-50 text-gray-800"
-              : "bg-white/30 border-white/20 text-white/50 cursor-not-allowed";
+              ? "bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/[0.1] hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/20 text-gray-800 dark:text-white"
+              : "bg-gray-100 dark:bg-white/[0.04] border-gray-100 dark:border-white/[0.05] text-gray-300 dark:text-white/30 cursor-not-allowed";
           } else if (opt.id === card.id) {
-            cls += "bg-green-100 border-green-500 text-green-800";
+            cls += "bg-green-100 dark:bg-green-500/20 border-green-500 text-green-800 dark:text-green-300";
           } else if (opt.id === selected) {
-            cls += "bg-red-100 border-red-400 text-red-700";
+            cls += "bg-red-100 dark:bg-red-500/20 border-red-400 text-red-700 dark:text-red-300";
           } else {
-            cls += "bg-white/50 border-white/30 text-gray-400";
+            cls += "bg-white/50 dark:bg-white/[0.03] border-gray-200 dark:border-white/[0.05] text-gray-400 dark:text-white/30";
           }
           return (
             <button key={opt.id} onClick={() => handlePick(opt)} className={cls}>
               <div>{opt.traditional}</div>
-              <div className="text-sm font-normal text-gray-400">{opt.pinyin}</div>
+              <div className="text-sm font-normal text-gray-400 dark:text-white/40">{opt.pinyin}</div>
             </button>
           );
         })}
@@ -303,7 +302,7 @@ function ListeningExercise({
   );
 }
 
-// ── Speaking Exercise: see word → tap to practice speaking ───────────────────
+// ── Speaking Exercise ─────────────────────────────────────────────────────────
 function SpeakingExercise({
   vocab,
   skill,
@@ -335,12 +334,12 @@ function SpeakingExercise({
 
   return (
     <div>
-      <p className="text-sm text-white/70 mb-3">
+      <p className="text-sm text-gray-500 dark:text-white/70 mb-3">
         Card {idx + 1} / {vocab.length} — Practice saying this word aloud
       </p>
-      <div className="bg-white rounded-2xl p-8 text-center mb-4 shadow-xl">
-        <div className="text-7xl font-bold text-gray-800 mb-2">{card.traditional}</div>
-        <div className="text-gray-400 text-sm mb-2">{card.meaning}</div>
+      <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center mb-4 shadow-xl">
+        <div className="text-7xl font-bold text-gray-800 dark:text-white mb-2">{card.traditional}</div>
+        <div className="text-gray-400 dark:text-white/40 text-sm mb-2">{card.meaning}</div>
         <button
           onClick={() => setShowPinyin(!showPinyin)}
           className="text-xs text-blue-400 hover:text-blue-600 mb-4 transition"
@@ -348,9 +347,9 @@ function SpeakingExercise({
           {showPinyin ? `📌 ${card.pinyin}` : "Show pinyin"}
         </button>
         {card.example && (
-          <div className="bg-gray-50 rounded-xl p-3 text-left mt-2">
-            <p className="text-gray-700 text-sm">{card.example}</p>
-            <p className="text-gray-400 text-xs mt-1">{card.exampleTranslation}</p>
+          <div className="bg-gray-50 dark:bg-white/[0.03] rounded-xl p-3 text-left mt-2">
+            <p className="text-gray-700 dark:text-white/80 text-sm">{card.example}</p>
+            <p className="text-gray-400 dark:text-white/40 text-xs mt-1">{card.exampleTranslation}</p>
           </div>
         )}
       </div>
@@ -374,7 +373,7 @@ function SpeakingExercise({
   );
 }
 
-// ── Writing Exercise: show meaning → recall character ────────────────────────
+// ── Writing Exercise ──────────────────────────────────────────────────────────
 function WritingExercise({
   vocab,
   skill,
@@ -413,30 +412,30 @@ function WritingExercise({
 
   return (
     <div>
-      <p className="text-sm text-white/70 mb-3">
+      <p className="text-sm text-gray-500 dark:text-white/70 mb-3">
         Card {idx + 1} / {vocab.length} — Can you write this character?
       </p>
-      <div className="bg-white rounded-2xl p-8 text-center mb-4 shadow-xl">
-        <p className="text-gray-500 text-sm mb-2">Meaning:</p>
-        <div className="text-3xl font-bold text-gray-800 mb-2">{card.meaning}</div>
-        <div className="text-gray-400 text-sm italic capitalize mb-4">
+      <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center mb-4 shadow-xl">
+        <p className="text-gray-500 dark:text-white/50 text-sm mb-2">Meaning:</p>
+        <div className="text-3xl font-bold text-gray-800 dark:text-white mb-2">{card.meaning}</div>
+        <div className="text-gray-400 dark:text-white/40 text-sm italic capitalize mb-4">
           ({card.partOfSpeech})
         </div>
 
         {!revealed ? (
           <button
             onClick={handleReveal}
-            className="bg-purple-100 text-purple-700 px-6 py-3 rounded-xl font-medium hover:bg-purple-200 transition"
+            className="bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 px-6 py-3 rounded-xl font-medium hover:bg-purple-200 dark:hover:bg-purple-500/30 transition"
           >
             Reveal Character →
           </button>
         ) : (
           <div>
-            <div className="text-7xl font-bold text-gray-800 mb-2">{card.traditional}</div>
-            <div className="text-xl text-purple-600">{card.pinyin}</div>
+            <div className="text-7xl font-bold text-gray-800 dark:text-white mb-2">{card.traditional}</div>
+            <div className="text-xl text-purple-600 dark:text-purple-400">{card.pinyin}</div>
             <button
               onClick={() => PronunciationPlayer.speak(card.traditional, "zh-TW")}
-              className="mt-2 text-sm text-gray-400 hover:text-gray-600 transition"
+              className="mt-2 text-sm text-gray-400 hover:text-gray-600 dark:hover:text-white/60 transition"
             >
               🔊 Listen
             </button>
@@ -478,14 +477,14 @@ function ScoreScreen({
 }) {
   const pct = Math.round((score / total) * 100);
   return (
-    <div className="bg-white rounded-2xl p-8 text-center shadow-xl">
+    <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center shadow-xl">
       <div className="text-5xl mb-3">
         {pct >= 80 ? "🏆" : pct >= 60 ? "⭐" : "📚"}
       </div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-1">
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">
         {pct >= 80 ? "Excellent!" : pct >= 60 ? "Good effort!" : "Keep practicing!"}
       </h2>
-      <p className="text-gray-500 mb-4">
+      <p className="text-gray-500 dark:text-white/50 mb-4">
         {score}/{total} correct ({pct}%)
       </p>
       <div className="flex gap-3">
@@ -497,7 +496,7 @@ function ScoreScreen({
         </button>
         <Link
           href="/"
-          className="flex-1 border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-bold text-center hover:bg-gray-50"
+          className="flex-1 border-2 border-gray-300 dark:border-white/[0.1] text-gray-600 dark:text-white/70 py-3 rounded-xl font-bold text-center hover:bg-gray-50 dark:hover:bg-white/[0.08]"
         >
           Home
         </Link>
@@ -514,6 +513,7 @@ export default function LessonsPage({
 }) {
   const { skill } = use(params);
   const meta = SKILL_META[skill] ?? SKILL_META.reading;
+  const { theme, toggle } = useTheme();
 
   const [completed, setCompleted] = useState<Set<string>>(new Set());
   const [selectedLevel, setSelectedLevel] = useState<HSKLevel>("A1");
@@ -535,7 +535,6 @@ export default function LessonsPage({
       setUserLevel(profile.level);
       setSelectedLevel(profile.level);
     }
-    // Read URL params for deep-link from home page
     const params = new URLSearchParams(window.location.search);
     if (params.get("source") === "book") {
       setSource("book");
@@ -597,13 +596,15 @@ export default function LessonsPage({
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8 px-4">
-      <div className="max-w-5xl mx-auto">
-        {/* Back */}
-        <Link href="/" className="text-white hover:text-gray-200 mb-6 inline-block">
-          ← Back to Home
-        </Link>
-
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+        <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+        <h1 className="font-bold text-sm capitalize">{meta.icon} {skill}</h1>
+        <button onClick={toggle} className="text-lg">
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+      </header>
+      <div className="max-w-5xl mx-auto py-8 px-4">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8 flex-wrap">
           <div
@@ -612,13 +613,13 @@ export default function LessonsPage({
             {meta.icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-4xl font-bold text-white capitalize">{skill}</h1>
-            <p className="text-white/70">{meta.description}</p>
+            <h2 className="text-3xl font-bold capitalize">{skill}</h2>
+            <p className="text-gray-500 dark:text-white/70">{meta.description}</p>
           </div>
           {skill === "listening" && (
             <Link
               href="/video-listening"
-              className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl font-bold text-sm transition flex items-center gap-2 shrink-0"
+              className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] hover:bg-gray-50 dark:hover:bg-white/[0.1] text-gray-700 dark:text-white px-4 py-2 rounded-xl font-bold text-sm transition flex items-center gap-2 shrink-0"
             >
               🎬 Video Lessons
             </Link>
@@ -629,13 +630,13 @@ export default function LessonsPage({
         <div className="flex gap-2 mb-5">
           <button
             onClick={() => { setSource("tocfl"); setMode("browse"); setExerciseScore(null); }}
-            className={`px-5 py-2 rounded-xl font-bold text-sm transition ${source === "tocfl" ? "bg-white text-gray-800 shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}
+            className={`px-5 py-2 rounded-xl font-bold text-sm transition ${source === "tocfl" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg" : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"}`}
           >
             📊 TOCFL Levels
           </button>
           <button
             onClick={() => { setSource("book"); setMode("browse"); setExerciseScore(null); }}
-            className={`px-5 py-2 rounded-xl font-bold text-sm transition ${source === "book" ? "bg-white text-gray-800 shadow-lg" : "bg-white/20 text-white hover:bg-white/30"}`}
+            className={`px-5 py-2 rounded-xl font-bold text-sm transition ${source === "book" ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 shadow-lg" : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"}`}
           >
             📖 時代華語 Book 1
           </button>
@@ -657,7 +658,7 @@ export default function LessonsPage({
                     className={`px-4 py-2 rounded-xl font-bold text-sm transition ${
                       selectedLevel === lvl
                         ? `${LEVEL_BADGE[lvl]} text-white shadow-lg`
-                        : "bg-white/20 text-white hover:bg-white/30"
+                        : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"
                     }`}
                   >
                     {lvl}
@@ -671,25 +672,25 @@ export default function LessonsPage({
             </div>
 
             {/* Level Info */}
-            <div className="bg-white/15 backdrop-blur rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
               <div>
                 <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-full ${LEVEL_BADGE[selectedLevel]}`}>
                   {selectedLevel}
                 </span>
-                <span className="text-white/80 text-sm ml-3">
+                <span className="text-gray-600 dark:text-white/80 text-sm ml-3">
                   {LEVEL_DESCRIPTIONS[selectedLevel]}
                 </span>
-                <div className="text-white/60 text-xs mt-1">
+                <div className="text-gray-400 dark:text-white/60 text-xs mt-1">
                   {completedInLevel}/{vocabForLevel.length} practiced in {skill}
                 </div>
               </div>
               {mode === "browse" && (
-                <button onClick={startExercise} className="bg-white text-gray-800 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition text-sm">
+                <button onClick={startExercise} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2 rounded-xl font-bold hover:opacity-90 transition text-sm">
                   🎯 Start {meta.exerciseLabel}
                 </button>
               )}
               {mode === "exercise" && exerciseScore === null && (
-                <button onClick={() => setMode("browse")} className="bg-white/30 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/40 transition">
+                <button onClick={() => setMode("browse")} className="bg-gray-100 dark:bg-white/[0.1] text-gray-700 dark:text-white px-4 py-2 rounded-xl text-sm hover:bg-gray-200 dark:hover:bg-white/[0.15] transition">
                   ← Back to Browse
                 </button>
               )}
@@ -710,7 +711,7 @@ export default function LessonsPage({
                     className={`px-4 py-2 rounded-xl font-bold text-sm transition ${
                       selectedUnit === u.unit
                         ? "bg-yellow-400 text-gray-900 shadow-lg"
-                        : "bg-white/20 text-white hover:bg-white/30"
+                        : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"
                     }`}
                   >
                     L{u.unit}
@@ -723,25 +724,25 @@ export default function LessonsPage({
             </div>
 
             {/* Unit Info */}
-            <div className="bg-white/15 backdrop-blur rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-4 mb-6 flex items-center justify-between flex-wrap gap-3">
               <div>
                 <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full bg-yellow-500">
                   Lesson {selectedUnit}
                 </span>
-                <span className="text-white/80 text-sm ml-3">
+                <span className="text-gray-600 dark:text-white/80 text-sm ml-3">
                   {SHIDAI_UNITS.find((u) => u.unit === selectedUnit)?.titleZh} — {SHIDAI_UNITS.find((u) => u.unit === selectedUnit)?.titleEn}
                 </span>
-                <div className="text-white/60 text-xs mt-1">
+                <div className="text-gray-400 dark:text-white/60 text-xs mt-1">
                   {bookWords.length} words in this lesson
                 </div>
               </div>
               {mode === "browse" && bookWords.length >= 4 && (
-                <button onClick={startExercise} className="bg-white text-gray-800 px-5 py-2 rounded-xl font-bold hover:bg-gray-100 transition text-sm">
+                <button onClick={startExercise} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-5 py-2 rounded-xl font-bold hover:opacity-90 transition text-sm">
                   🎯 Start {meta.exerciseLabel}
                 </button>
               )}
               {mode === "exercise" && exerciseScore === null && (
-                <button onClick={() => setMode("browse")} className="bg-white/30 text-white px-4 py-2 rounded-xl text-sm hover:bg-white/40 transition">
+                <button onClick={() => setMode("browse")} className="bg-gray-100 dark:bg-white/[0.1] text-gray-700 dark:text-white px-4 py-2 rounded-xl text-sm hover:bg-gray-200 dark:hover:bg-white/[0.15] transition">
                   ← Back to Browse
                 </button>
               )}
@@ -757,7 +758,7 @@ export default function LessonsPage({
               return (
                 <div
                   key={vocab.id}
-                  className={`bg-white rounded-2xl p-5 shadow-lg hover:shadow-xl transition ${
+                  className={`bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 shadow-lg hover:shadow-xl transition ${
                     isDone ? "ring-2 ring-green-400" : ""
                   }`}
                 >
@@ -775,26 +776,26 @@ export default function LessonsPage({
                       <span className="text-green-500 font-bold text-xs">✓ Done</span>
                     )}
                   </div>
-                  <div className="text-4xl font-bold text-gray-800 mb-1">
+                  <div className="text-4xl font-bold text-gray-800 dark:text-white mb-1">
                     {vocab.traditional}
                   </div>
-                  <div className="text-purple-600 font-medium mb-1">{vocab.pinyin}</div>
-                  <div className="text-gray-600 text-sm mb-2">{vocab.meaning}</div>
-                  <div className="text-xs text-gray-400 italic capitalize mb-3">
+                  <div className="text-purple-600 dark:text-purple-400 font-medium mb-1">{vocab.pinyin}</div>
+                  <div className="text-gray-600 dark:text-white/70 text-sm mb-2">{vocab.meaning}</div>
+                  <div className="text-xs text-gray-400 dark:text-white/40 italic capitalize mb-3">
                     {vocab.partOfSpeech}
                   </div>
                   {vocab.example && (
-                    <div className="bg-gray-50 rounded-lg p-2 text-xs text-gray-600 mb-3">
+                    <div className="bg-gray-50 dark:bg-white/[0.03] rounded-lg p-2 text-xs text-gray-600 dark:text-white/60 mb-3">
                       <p>{vocab.example}</p>
-                      <p className="text-gray-400 mt-0.5">{vocab.exampleTranslation}</p>
+                      <p className="text-gray-400 dark:text-white/40 mt-0.5">{vocab.exampleTranslation}</p>
                     </div>
                   )}
                   <button
                     onClick={() => playAudio(vocab.id, vocab.traditional)}
                     className={`w-full py-1.5 rounded-lg text-sm font-medium transition ${
                       playingId === vocab.id
-                        ? "bg-red-100 text-red-600"
-                        : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                        ? "bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-300"
+                        : "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/20"
                     }`}
                   >
                     {playingId === vocab.id ? "⏹ Stop" : "🔊 Listen"}
@@ -818,9 +819,9 @@ export default function LessonsPage({
               onComplete={handleExerciseDone}
             />
           ) : (
-            <div className="bg-white rounded-2xl p-8 text-center shadow-xl">
-              <p className="text-gray-500">No reading passage available for this selection.</p>
-              <button onClick={() => setMode("browse")} className="mt-4 text-blue-600 underline">Back to Browse</button>
+            <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center shadow-xl">
+              <p className="text-gray-500 dark:text-white/50">No reading passage available for this selection.</p>
+              <button onClick={() => setMode("browse")} className="mt-4 text-blue-600 dark:text-blue-400 underline">Back to Browse</button>
             </div>
           )
         ) : skill === "listening" ? (

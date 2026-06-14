@@ -5,6 +5,7 @@ import { useState } from "react";
 import { saveUserProfile, loadUserProfile } from "@/lib/storage";
 import type { HSKLevel } from "@/data/vocabulary";
 import { LEVEL_CAREERS, LEVEL_DESCRIPTIONS } from "@/data/vocabulary";
+import { useTheme } from "@/lib/theme";
 
 type Question = {
   id: number;
@@ -208,6 +209,7 @@ const LEVEL_COLORS: Record<HSKLevel, string> = {
 };
 
 export default function PretestPage() {
+  const { theme, toggle } = useTheme();
   const [step, setStep] = useState<"intro" | "quiz" | "result">("intro");
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -249,42 +251,48 @@ export default function PretestPage() {
 
   if (step === "intro") {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full text-center">
-          <div className="text-6xl mb-4">🎯</div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-3">TOCFL Placement Test</h1>
-          <p className="text-gray-600 mb-6">
-            Answer 20 questions across all TOCFL levels (A1–C2). We'll determine
-            your current level and recommend suitable career paths for you.
-          </p>
-          <div className="bg-blue-50 rounded-xl p-4 mb-6 text-left">
-            <p className="font-semibold text-blue-800 mb-2">What to expect:</p>
-            <ul className="text-blue-700 space-y-1 text-sm">
-              <li>📝 20 multiple-choice questions</li>
-              <li>📈 Questions progress A1 → C2</li>
-              <li>🏆 Instant level placement</li>
-              <li>💼 Career recommendations</li>
-              <li>⏱️ No time limit — take your time</li>
-            </ul>
+      <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white flex items-center justify-center p-4">
+        <div className="w-full max-w-lg">
+          <div className="flex justify-between items-center mb-6">
+            <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+            <button onClick={toggle} className="text-lg">{theme === "dark" ? "☀️" : "🌙"}</button>
           </div>
-          <div className="mb-6">
-            <input
-              type="text"
-              placeholder="Your name (optional)"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-center focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-2xl p-8 text-center">
+            <div className="text-6xl mb-4">🎯</div>
+            <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-3">TOCFL Placement Test</h1>
+            <p className="text-gray-600 dark:text-white/60 mb-6">
+              Answer 20 questions across all TOCFL levels (A1–C2). We'll determine
+              your current level and recommend suitable career paths for you.
+            </p>
+            <div className="bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl p-4 mb-6 text-left">
+              <p className="font-semibold text-blue-800 dark:text-blue-300 mb-2">What to expect:</p>
+              <ul className="text-blue-700 dark:text-blue-300/80 space-y-1 text-sm">
+                <li>📝 20 multiple-choice questions</li>
+                <li>📈 Questions progress A1 → C2</li>
+                <li>🏆 Instant level placement</li>
+                <li>💼 Career recommendations</li>
+                <li>⏱️ No time limit — take your time</li>
+              </ul>
+            </div>
+            <div className="mb-6">
+              <input
+                type="text"
+                placeholder="Your name (optional)"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-white dark:bg-white/[0.06] border border-gray-300 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-lg px-4 py-2 text-center focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <button
+              onClick={() => setStep("quiz")}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-bold text-lg hover:opacity-90 transition"
+            >
+              Start Test →
+            </button>
+            <Link href="/" className="block mt-4 text-gray-500 dark:text-white/50 hover:text-gray-700 dark:hover:text-white text-sm">
+              ← Back to Home
+            </Link>
           </div>
-          <button
-            onClick={() => setStep("quiz")}
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-bold text-lg hover:opacity-90 transition"
-          >
-            Start Test →
-          </button>
-          <Link href="/" className="block mt-4 text-gray-500 hover:text-gray-700 text-sm">
-            ← Back to Home
-          </Link>
         </div>
       </main>
     );
@@ -297,83 +305,89 @@ export default function PretestPage() {
     const careers = LEVEL_CAREERS[finalLevel];
 
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-xl w-full">
-          <div className="text-center mb-6">
-            <div className="text-5xl mb-3">🏆</div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-1">
-              {name ? `Great job, ${name}!` : "Test Complete!"}
-            </h1>
-            <p className="text-gray-500">
-              You scored {finalScore}/{QUESTIONS.length} ({percent}%)
-            </p>
+      <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white flex items-center justify-center p-4">
+        <div className="w-full max-w-xl">
+          <div className="flex justify-between items-center mb-6">
+            <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+            <button onClick={toggle} className="text-lg">{theme === "dark" ? "☀️" : "🌙"}</button>
           </div>
-
-          {/* Level Badge */}
-          <div
-            className={`bg-gradient-to-r ${LEVEL_COLORS[finalLevel]} text-white rounded-2xl p-6 text-center mb-6`}
-          >
-            <div className="text-4xl font-black mb-1">{finalLevel}</div>
-            <div className="text-lg font-semibold opacity-90">
-              {finalLevel === "A1" && "入門級 Survival"}
-              {finalLevel === "A2" && "基礎級 Elementary"}
-              {finalLevel === "B1" && "進階級 Intermediate"}
-              {finalLevel === "B2" && "高階級 Upper-Intermediate"}
-              {finalLevel === "C1" && "流利級 Advanced"}
-              {finalLevel === "C2" && "精通級 Mastery"}
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-2xl p-8">
+            <div className="text-center mb-6">
+              <div className="text-5xl mb-3">🏆</div>
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-1">
+                {name ? `Great job, ${name}!` : "Test Complete!"}
+              </h1>
+              <p className="text-gray-500 dark:text-white/50">
+                You scored {finalScore}/{QUESTIONS.length} ({percent}%)
+              </p>
             </div>
-            <p className="text-sm opacity-80 mt-2">{LEVEL_DESCRIPTIONS[finalLevel]}</p>
-          </div>
 
-          {/* Score breakdown by level */}
-          <div className="mb-6">
-            <h2 className="font-bold text-gray-700 mb-3">Score by Level</h2>
-            {(["A1", "A2", "B1", "B2", "C1", "C2"] as HSKLevel[]).map((lvl) => {
-              const qs = QUESTIONS.filter((q) => q.level === lvl);
-              const correct = qs.filter((q) => answers[q.id - 1] === q.correct).length;
-              const pct = qs.length ? Math.round((correct / qs.length) * 100) : 0;
-              return (
-                <div key={lvl} className="flex items-center gap-3 mb-2">
-                  <span className="w-8 font-bold text-gray-600 text-sm">{lvl}</span>
-                  <div className="flex-1 bg-gray-100 rounded-full h-3">
-                    <div
-                      className={`bg-gradient-to-r ${LEVEL_COLORS[lvl]} h-3 rounded-full transition-all`}
-                      style={{ width: `${pct}%` }}
-                    />
+            {/* Level Badge */}
+            <div
+              className={`bg-gradient-to-r ${LEVEL_COLORS[finalLevel]} text-white rounded-2xl p-6 text-center mb-6`}
+            >
+              <div className="text-4xl font-black mb-1">{finalLevel}</div>
+              <div className="text-lg font-semibold opacity-90">
+                {finalLevel === "A1" && "入門級 Survival"}
+                {finalLevel === "A2" && "基礎級 Elementary"}
+                {finalLevel === "B1" && "進階級 Intermediate"}
+                {finalLevel === "B2" && "高階級 Upper-Intermediate"}
+                {finalLevel === "C1" && "流利級 Advanced"}
+                {finalLevel === "C2" && "精通級 Mastery"}
+              </div>
+              <p className="text-sm opacity-80 mt-2">{LEVEL_DESCRIPTIONS[finalLevel]}</p>
+            </div>
+
+            {/* Score breakdown by level */}
+            <div className="mb-6">
+              <h2 className="font-bold text-gray-700 dark:text-white/80 mb-3">Score by Level</h2>
+              {(["A1", "A2", "B1", "B2", "C1", "C2"] as HSKLevel[]).map((lvl) => {
+                const qs = QUESTIONS.filter((q) => q.level === lvl);
+                const correct = qs.filter((q) => answers[q.id - 1] === q.correct).length;
+                const pct = qs.length ? Math.round((correct / qs.length) * 100) : 0;
+                return (
+                  <div key={lvl} className="flex items-center gap-3 mb-2">
+                    <span className="w-8 font-bold text-gray-600 dark:text-white/70 text-sm">{lvl}</span>
+                    <div className="flex-1 bg-gray-100 dark:bg-white/[0.08] rounded-full h-3">
+                      <div
+                        className={`bg-gradient-to-r ${LEVEL_COLORS[lvl]} h-3 rounded-full transition-all`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-sm text-gray-500 dark:text-white/50 w-14 text-right">
+                      {correct}/{qs.length}
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-500 w-14 text-right">
-                    {correct}/{qs.length}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
 
-          {/* Career Recommendations */}
-          <div className="bg-amber-50 rounded-xl p-4 mb-6">
-            <h2 className="font-bold text-amber-800 mb-2">💼 Suitable Careers</h2>
-            <ul className="space-y-1">
-              {careers.map((c) => (
-                <li key={c} className="text-amber-700 text-sm flex items-center gap-2">
-                  <span>✦</span> {c}
-                </li>
-              ))}
-            </ul>
-          </div>
+            {/* Career Recommendations */}
+            <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 rounded-xl p-4 mb-6">
+              <h2 className="font-bold text-amber-800 dark:text-amber-300 mb-2">💼 Suitable Careers</h2>
+              <ul className="space-y-1">
+                {careers.map((c) => (
+                  <li key={c} className="text-amber-700 dark:text-amber-300/80 text-sm flex items-center gap-2">
+                    <span>✦</span> {c}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          <div className="flex gap-3">
-            <Link
-              href="/study"
-              className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-bold text-center hover:opacity-90 transition"
-            >
-              Start Studying →
-            </Link>
-            <Link
-              href="/"
-              className="flex-1 border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-bold text-center hover:bg-gray-50 transition"
-            >
-              Back to Home
-            </Link>
+            <div className="flex gap-3">
+              <Link
+                href="/study"
+                className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-bold text-center hover:opacity-90 transition"
+              >
+                Start Studying →
+              </Link>
+              <Link
+                href="/"
+                className="flex-1 border-2 border-gray-300 dark:border-white/[0.1] text-gray-600 dark:text-white/70 py-3 rounded-xl font-bold text-center hover:bg-gray-50 dark:hover:bg-white/[0.08] transition"
+              >
+                Back to Home
+              </Link>
+            </div>
           </div>
         </div>
       </main>
@@ -385,96 +399,102 @@ export default function PretestPage() {
   const isCorrect = selected === question.correct;
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-xl w-full">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-gray-500 font-medium">
-            Question {current + 1} / {QUESTIONS.length}
-          </span>
-          <span
-            className={`text-xs font-bold px-3 py-1 rounded-full text-white bg-gradient-to-r ${LEVEL_COLORS[question.level]}`}
-          >
-            {question.level}
-          </span>
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white flex items-center justify-center p-4">
+      <div className="w-full max-w-xl">
+        <div className="flex justify-between items-center mb-4">
+          <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+          <button onClick={toggle} className="text-lg">{theme === "dark" ? "☀️" : "🌙"}</button>
         </div>
-
-        {/* Progress Bar */}
-        <div className="w-full bg-gray-100 rounded-full h-2 mb-6">
-          <div
-            className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        {/* Question */}
-        <h2 className="text-xl font-bold text-gray-800 mb-6">{question.prompt}</h2>
-
-        {/* Options */}
-        <div className="space-y-3 mb-6">
-          {question.options.map((option, i) => {
-            let classes =
-              "w-full p-4 rounded-xl border-2 text-left font-medium transition ";
-            if (!showFeedback) {
-              classes +=
-                selected === i
-                  ? "border-blue-500 bg-blue-50 text-blue-800"
-                  : "border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-700";
-            } else {
-              if (i === question.correct) {
-                classes += "border-green-500 bg-green-50 text-green-800";
-              } else if (i === selected && i !== question.correct) {
-                classes += "border-red-400 bg-red-50 text-red-700";
-              } else {
-                classes += "border-gray-200 text-gray-400";
-              }
-            }
-            return (
-              <button
-                key={i}
-                onClick={() => handleAnswer(i)}
-                className={classes}
-              >
-                <span className="mr-3 font-bold text-gray-400">
-                  {["A", "B", "C", "D"][i]}.
-                </span>
-                {option}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Feedback */}
-        {showFeedback && (
-          <div
-            className={`p-4 rounded-xl mb-4 ${
-              isCorrect
-                ? "bg-green-50 border border-green-200 text-green-800"
-                : "bg-red-50 border border-red-200 text-red-800"
-            }`}
-          >
-            <p className="font-semibold mb-1">
-              {isCorrect ? "✅ Correct!" : "❌ Incorrect"}
-            </p>
-            {!isCorrect && (
-              <p className="text-sm">
-                The correct answer is: <strong>{question.options[question.correct]}</strong>
-              </p>
-            )}
+        <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-2xl p-8">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm text-gray-500 dark:text-white/50 font-medium">
+              Question {current + 1} / {QUESTIONS.length}
+            </span>
+            <span
+              className={`text-xs font-bold px-3 py-1 rounded-full text-white bg-gradient-to-r ${LEVEL_COLORS[question.level]}`}
+            >
+              {question.level}
+            </span>
           </div>
-        )}
 
-        <button
-          onClick={showFeedback ? handleNext : () => selected !== null && handleAnswer(selected)}
-          disabled={selected === null && !showFeedback}
-          className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-bold text-lg hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          {showFeedback
-            ? current + 1 >= QUESTIONS.length
-              ? "See Results →"
-              : "Next Question →"
-            : "Check Answer"}
-        </button>
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-100 dark:bg-white/[0.08] rounded-full h-2 mb-6">
+            <div
+              className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          {/* Question */}
+          <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-6">{question.prompt}</h2>
+
+          {/* Options */}
+          <div className="space-y-3 mb-6">
+            {question.options.map((option, i) => {
+              let classes =
+                "w-full p-4 rounded-xl border-2 text-left font-medium transition ";
+              if (!showFeedback) {
+                classes +=
+                  selected === i
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300"
+                    : "border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-white/[0.08]";
+              } else {
+                if (i === question.correct) {
+                  classes += "border-green-500 bg-green-50 dark:bg-green-500/20 text-green-800 dark:text-green-300";
+                } else if (i === selected && i !== question.correct) {
+                  classes += "border-red-400 bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300";
+                } else {
+                  classes += "border-gray-200 dark:border-white/[0.06] text-gray-400 dark:text-white/30";
+                }
+              }
+              return (
+                <button
+                  key={i}
+                  onClick={() => handleAnswer(i)}
+                  className={classes}
+                >
+                  <span className="mr-3 font-bold text-gray-400 dark:text-white/40">
+                    {["A", "B", "C", "D"][i]}.
+                  </span>
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Feedback */}
+          {showFeedback && (
+            <div
+              className={`p-4 rounded-xl mb-4 ${
+                isCorrect
+                  ? "bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-800 dark:text-green-300"
+                  : "bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-800 dark:text-red-300"
+              }`}
+            >
+              <p className="font-semibold mb-1">
+                {isCorrect ? "✅ Correct!" : "❌ Incorrect"}
+              </p>
+              {!isCorrect && (
+                <p className="text-sm">
+                  The correct answer is: <strong>{question.options[question.correct]}</strong>
+                </p>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={showFeedback ? handleNext : () => selected !== null && handleAnswer(selected)}
+            disabled={selected === null && !showFeedback}
+            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-bold text-lg hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {showFeedback
+              ? current + 1 >= QUESTIONS.length
+                ? "See Results →"
+                : "Next Question →"
+              : "Check Answer"}
+          </button>
+        </div>
       </div>
     </main>
   );

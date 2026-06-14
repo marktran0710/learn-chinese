@@ -7,6 +7,7 @@ import { TOCFL_VOCAB, type VocabEntry } from "@/data/vocabulary";
 import { loadCustomWords, saveCustomWords } from "@/lib/storage";
 import type { CustomWord } from "@/lib/storage";
 import { guessMeaning, autoPinyin } from "@/lib/guessMeaning";
+import { useTheme } from "@/lib/theme";
 
 // ══════════════════════════════════════════════════════════════════════════════
 // Shared helpers
@@ -87,29 +88,29 @@ function KnownWordCard({ entry, saved, onSave }: { entry: VocabEntry; saved: boo
   const [showEx, setShowEx] = useState(false);
   const py = pinyin(entry.traditional, { toneType: "symbol", type: "string" });
   return (
-    <div className={`bg-white rounded-2xl shadow-sm border-2 p-4 transition-all ${saved ? "border-green-400 bg-green-50" : "border-gray-100 hover:border-blue-200"}`}>
+    <div className={`bg-white dark:bg-white/[0.04] rounded-2xl shadow-sm border-2 p-4 transition-all ${saved ? "border-green-400 bg-green-50 dark:bg-green-500/10" : "border-gray-100 dark:border-white/[0.08] hover:border-blue-200"}`}>
       <div className="flex items-start justify-between gap-2 mb-1">
-        <span className="text-2xl font-bold text-gray-900 leading-none">{entry.traditional}</span>
+        <span className="text-2xl font-bold text-gray-900 dark:text-white leading-none">{entry.traditional}</span>
         <div className="flex items-center gap-1.5 shrink-0">
           <LevelBadge level={entry.level} />
           <button onClick={onSave}
-            className={`w-7 h-7 rounded-full flex items-center justify-center text-sm transition ${saved ? "bg-green-500 text-white" : "bg-gray-100 hover:bg-blue-100 text-gray-500"}`}>
+            className={`w-7 h-7 rounded-full flex items-center justify-center text-sm transition ${saved ? "bg-green-500 text-white" : "bg-gray-100 dark:bg-white/[0.08] hover:bg-blue-100 dark:hover:bg-blue-500/20 text-gray-500 dark:text-white/50"}`}>
             {saved ? "✓" : "+"}
           </button>
         </div>
       </div>
       <p className="text-blue-500 text-sm font-medium mb-0.5">{py}</p>
-      <p className="text-gray-500 text-xs italic mb-1">{entry.partOfSpeech}</p>
-      <p className="text-gray-800 text-sm leading-snug">{entry.meaning}</p>
+      <p className="text-gray-500 dark:text-white/50 text-xs italic mb-1">{entry.partOfSpeech}</p>
+      <p className="text-gray-800 dark:text-white/80 text-sm leading-snug">{entry.meaning}</p>
       {entry.example && (
         <button onClick={() => setShowEx((v) => !v)} className="text-xs text-blue-400 hover:text-blue-600 mt-2 underline">
           {showEx ? "Hide example" : "Show example"}
         </button>
       )}
       {showEx && entry.example && (
-        <div className="mt-2 bg-blue-50 rounded-xl p-3 border border-blue-100">
-          <p className="text-gray-800 text-sm">{entry.example}</p>
-          <p className="text-gray-500 text-xs mt-0.5 italic">{entry.exampleTranslation}</p>
+        <div className="mt-2 bg-blue-50 dark:bg-blue-500/10 rounded-xl p-3 border border-blue-100 dark:border-blue-500/20">
+          <p className="text-gray-800 dark:text-white/80 text-sm">{entry.example}</p>
+          <p className="text-gray-500 dark:text-white/50 text-xs mt-0.5 italic">{entry.exampleTranslation}</p>
         </div>
       )}
     </div>
@@ -120,13 +121,13 @@ function UnknownItemCard({ item, saved, onSave }: { item: UnknownItem; saved: bo
   const py = autoPinyin(item.text);
   const guessed = guessMeaning(item.text);
   return (
-    <div className={`bg-white rounded-xl border-2 shadow-sm p-3 flex flex-col items-center gap-1 transition-all ${saved ? "border-green-400 bg-green-50" : "border-gray-100 hover:border-blue-200"}`}>
-      <div className={`font-bold text-gray-700 ${item.text.length > 1 ? "text-lg" : "text-2xl"}`}>{item.text}</div>
+    <div className={`bg-white dark:bg-white/[0.04] rounded-xl border-2 shadow-sm p-3 flex flex-col items-center gap-1 transition-all ${saved ? "border-green-400 bg-green-50 dark:bg-green-500/10" : "border-gray-100 dark:border-white/[0.08] hover:border-blue-200"}`}>
+      <div className={`font-bold text-gray-700 dark:text-white ${item.text.length > 1 ? "text-lg" : "text-2xl"}`}>{item.text}</div>
       <div className="text-blue-400 text-xs text-center">{py}</div>
-      {guessed && <div className="text-gray-400 text-xs text-center italic leading-tight">{guessed}</div>}
-      {item.count > 1 && <div className="text-gray-300 text-xs">×{item.count}</div>}
+      {guessed && <div className="text-gray-400 dark:text-white/40 text-xs text-center italic leading-tight">{guessed}</div>}
+      {item.count > 1 && <div className="text-gray-300 dark:text-white/20 text-xs">×{item.count}</div>}
       <button onClick={onSave}
-        className={`mt-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${saved ? "bg-green-500 text-white" : "bg-gray-100 hover:bg-blue-100 text-gray-500"}`}>
+        className={`mt-1 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition ${saved ? "bg-green-500 text-white" : "bg-gray-100 dark:bg-white/[0.08] hover:bg-blue-100 dark:hover:bg-blue-500/20 text-gray-500 dark:text-white/50"}`}>
         {saved ? "✓" : "+"}
       </button>
     </div>
@@ -204,7 +205,7 @@ function ExtractTab() {
       <div className="flex gap-2 mb-4">
         {([["file", "📁 Upload File"], ["type", "⌨️ Type / Paste"]] as [InputMode, string][]).map(([m, label]) => (
           <button key={m} onClick={() => setInputMode(m)}
-            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition ${inputMode === m ? "bg-yellow-400 text-gray-900" : "bg-white/15 text-white hover:bg-white/25"}`}>
+            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition ${inputMode === m ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"}`}>
             {label}
           </button>
         ))}
@@ -214,12 +215,12 @@ function ExtractTab() {
         <div onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
           onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) processFile(f); }}
           onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition mb-6 ${dragging ? "border-yellow-400 bg-yellow-400/10" : "border-white/30 hover:border-white/60 bg-white/5 hover:bg-white/10"}`}>
+          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition mb-6 ${dragging ? "border-blue-400 bg-blue-50 dark:bg-blue-500/10" : "border-gray-300 dark:border-white/[0.15] hover:border-gray-400 dark:hover:border-white/30 bg-gray-50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06]"}`}>
           <input ref={fileRef} type="file" accept=".pdf,.docx,.doc,.txt" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f); }} />
           <div className="text-5xl mb-3">{loading ? "⏳" : "📁"}</div>
-          {loading ? <p className="text-white font-bold">Extracting vocabulary…</p>
-            : fileName && hasResults ? <div><p className="text-yellow-300 font-bold">{fileName}</p><p className="text-white/50 text-sm mt-1">Click to replace</p></div>
-            : <div><p className="text-white font-bold text-lg mb-1">Drop your document here</p><p className="text-white/50 text-sm">PDF · DOCX · DOC · TXT</p></div>}
+          {loading ? <p className="text-gray-700 dark:text-white font-bold">Extracting vocabulary…</p>
+            : fileName && hasResults ? <div><p className="text-blue-600 dark:text-yellow-300 font-bold">{fileName}</p><p className="text-gray-500 dark:text-white/50 text-sm mt-1">Click to replace</p></div>
+            : <div><p className="text-gray-700 dark:text-white font-bold text-lg mb-1">Drop your document here</p><p className="text-gray-500 dark:text-white/50 text-sm">PDF · DOCX · DOC · TXT</p></div>}
         </div>
       )}
 
@@ -227,29 +228,29 @@ function ExtractTab() {
         <div className="mb-6 space-y-3">
           <textarea value={typedText} onChange={(e) => setTypedText(e.target.value)} rows={8}
             placeholder={"在這裡輸入或貼上中文文字…\nType or paste Chinese text here."}
-            className="w-full bg-white/10 text-white placeholder:text-white/35 rounded-2xl px-5 py-4 text-base border-2 border-white/20 focus:outline-none focus:border-yellow-400 transition resize-none leading-relaxed" />
+            className="w-full bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-2xl px-5 py-4 text-base focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition resize-none leading-relaxed" />
           <div className="flex gap-3 items-center">
             <button onClick={() => typedText.trim() && analyze(typedText, "typed text")} disabled={!typedText.trim()}
-              className="px-6 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-bold rounded-xl text-sm transition disabled:opacity-40">
+              className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold rounded-xl text-sm transition hover:opacity-90 disabled:opacity-40">
               🔍 Analyse Text
             </button>
             <button onClick={() => { setTypedText(""); setChineseText(""); setKnownWords([]); setUnknownItems([]); setSaved({}); setRawText(""); setFileName(""); }}
-              className="px-4 py-2.5 bg-white/15 hover:bg-white/25 text-white rounded-xl text-sm transition">Clear</button>
-            {typedText.length > 0 && <span className="text-white/40 text-xs ml-auto">{(typedText.match(/[一-鿿㐀-䶿豈-﫿]+/g) ?? []).join("").length} Chinese chars</span>}
+              className="px-4 py-2.5 bg-gray-100 dark:bg-white/[0.08] hover:bg-gray-200 dark:hover:bg-white/[0.12] text-gray-700 dark:text-white rounded-xl text-sm transition">Clear</button>
+            {typedText.length > 0 && <span className="text-gray-400 dark:text-white/40 text-xs ml-auto">{(typedText.match(/[一-鿿㐀-䶿豈-﫿]+/g) ?? []).join("").length} Chinese chars</span>}
           </div>
         </div>
       )}
 
-      {error && <div className="bg-red-500/20 border border-red-400/40 rounded-xl p-4 mb-6 text-red-200"><strong>Error:</strong> {error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-500/20 border border-red-200 dark:border-red-400/40 rounded-xl p-4 mb-6 text-red-700 dark:text-red-200"><strong>Error:</strong> {error}</div>}
 
       {hasResults && (
         <>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
             {[
-              ["Chinese chars", chineseText.length, "bg-white/10 text-white"],
-              ["TOCFL words", knownWords.length, "bg-blue-500/30 text-white"],
-              ["Unknown items", unknownItems.length, "bg-orange-500/30 text-white"],
-              ["Saved", savedCount, "bg-green-500/30 text-white"],
+              ["Chinese chars", chineseText.length, "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white"],
+              ["TOCFL words", knownWords.length, "bg-blue-50 dark:bg-blue-500/20 border border-blue-100 dark:border-blue-500/30 text-blue-700 dark:text-white"],
+              ["Unknown items", unknownItems.length, "bg-orange-50 dark:bg-orange-500/20 border border-orange-100 dark:border-orange-500/30 text-orange-700 dark:text-white"],
+              ["Saved", savedCount, "bg-green-50 dark:bg-green-500/20 border border-green-100 dark:border-green-500/30 text-green-700 dark:text-white"],
             ].map(([label, val, cls]) => (
               <div key={label as string} className={`rounded-xl px-4 py-3 text-center ${cls}`}>
                 <div className="text-2xl font-black">{val}</div>
@@ -265,7 +266,7 @@ function ExtractTab() {
               ["text", "📝 Raw Text"],
             ] as [DocResultTab, string][]).map(([t, label]) => (
               <button key={t} onClick={() => setTab(t)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition ${tab === t ? "bg-yellow-400 text-gray-900" : "bg-white/15 text-white hover:bg-white/25"}`}>
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition ${tab === t ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"}`}>
                 {label}
               </button>
             ))}
@@ -275,11 +276,11 @@ function ExtractTab() {
             <div>
               <div className="flex flex-wrap gap-3 mb-3 items-center">
                 <input type="text" placeholder="Search…" value={filter} onChange={(e) => setFilter(e.target.value)}
-                  className="flex-1 min-w-40 bg-white/10 text-white placeholder:text-white/40 rounded-xl px-4 py-2 text-sm border border-white/20 focus:outline-none focus:border-yellow-400" />
+                  className="flex-1 min-w-40 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-blue-500" />
                 <select value={levelFilter} onChange={(e) => setLevelFilter(e.target.value)}
-                  className="bg-white/10 text-white rounded-xl px-3 py-2 text-sm border border-white/20 focus:outline-none">
-                  <option value="all" className="text-gray-900">All Levels</option>
-                  {levels.map((l) => <option key={l} value={l} className="text-gray-900">{l}</option>)}
+                  className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white rounded-xl px-3 py-2 text-sm focus:outline-none">
+                  <option value="all">All Levels</option>
+                  {levels.map((l) => <option key={l} value={l}>{l}</option>)}
                 </select>
                 <button onClick={() => filteredWords.forEach((e) => { if (!saved[e.traditional]) saveKnown(e); })}
                   className="px-4 py-2 bg-green-500 hover:bg-green-400 text-white font-bold rounded-xl text-sm transition">
@@ -289,13 +290,13 @@ function ExtractTab() {
               <div className="flex flex-wrap gap-2 mb-3">
                 {levels.map((l) => (
                   <button key={l} onClick={() => setLevelFilter(levelFilter === l ? "all" : l)}
-                    className={`px-3 py-1 rounded-xl text-xs font-bold transition ${levelFilter === l ? "ring-2 ring-yellow-400" : ""} ${LEVEL_COLORS[l] ?? "bg-gray-100 text-gray-600"}`}>
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition ${levelFilter === l ? "ring-2 ring-blue-500" : ""} ${LEVEL_COLORS[l] ?? "bg-gray-100 text-gray-600"}`}>
                     {l} · {knownWords.filter((w) => w.level === l).length}
                   </button>
                 ))}
               </div>
               {filteredWords.length === 0
-                ? <p className="text-white/40 text-center py-10">No words match.</p>
+                ? <p className="text-gray-500 dark:text-white/40 text-center py-10">No words match.</p>
                 : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {filteredWords.map((e) => <KnownWordCard key={e.id} entry={e} saved={!!saved[e.traditional]} onSave={() => saveKnown(e)} />)}
                 </div>}
@@ -305,14 +306,14 @@ function ExtractTab() {
           {tab === "unknown" && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-white/60 text-sm">Meanings are auto-guessed — edit in <Link href="/vocabulary" className="underline text-yellow-300">My Words</Link>.</p>
+                <p className="text-gray-500 dark:text-white/60 text-sm">Meanings are auto-guessed — edit in <Link href="/vocabulary" className="underline text-blue-600 dark:text-yellow-300">My Words</Link>.</p>
                 <button onClick={() => unknownItems.forEach((it) => { if (!saved[`u:${it.text}`]) saveUnknown(it); })}
                   className="shrink-0 ml-4 px-4 py-1.5 bg-green-500 hover:bg-green-400 text-white text-xs font-bold rounded-xl transition">
                   Save All
                 </button>
               </div>
               {unknownItems.length === 0
-                ? <p className="text-white/40 text-center py-10">All items matched to TOCFL vocab!</p>
+                ? <p className="text-gray-500 dark:text-white/40 text-center py-10">All items matched to TOCFL vocab!</p>
                 : <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
                   {unknownItems.map((it) => <UnknownItemCard key={it.text} item={it} saved={!!saved[`u:${it.text}`]} onSave={() => saveUnknown(it)} />)}
                 </div>}
@@ -320,27 +321,27 @@ function ExtractTab() {
           )}
 
           {tab === "text" && (
-            <div className="bg-white/10 rounded-2xl p-5">
-              <p className="text-white/50 text-xs mb-3 font-bold uppercase tracking-wide">Extracted Text — {rawText.length} chars</p>
-              <pre className="text-white/80 text-sm whitespace-pre-wrap leading-relaxed font-sans max-h-96 overflow-y-auto">{rawText || "(No text)"}</pre>
+            <div className="bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5">
+              <p className="text-gray-500 dark:text-white/50 text-xs mb-3 font-bold uppercase tracking-wide">Extracted Text — {rawText.length} chars</p>
+              <pre className="text-gray-700 dark:text-white/80 text-sm whitespace-pre-wrap leading-relaxed font-sans max-h-96 overflow-y-auto">{rawText || "(No text)"}</pre>
             </div>
           )}
         </>
       )}
 
       {!hasResults && !loading && !error && (
-        <div className="bg-white/10 rounded-2xl p-10 text-center">
+        <div className="bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-10 text-center">
           <div className="text-6xl mb-4">🈶</div>
-          <h3 className="text-white font-bold text-xl mb-5">How it works</h3>
+          <h3 className="text-gray-800 dark:text-white font-bold text-xl mb-5">How it works</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
             {[
               ["1️⃣ Input", "Upload PDF / DOCX / TXT or paste any Chinese text"],
               ["2️⃣ Extract", "Every word is matched against TOCFL; unknown items get auto-guessed meanings"],
               ["3️⃣ Study", "Save to My Words and practice with flashcards or quizzes"],
             ].map(([title, desc]) => (
-              <div key={title as string} className="bg-white/10 rounded-xl p-4">
-                <div className="text-lg font-bold text-white mb-1">{title}</div>
-                <div className="text-white/60 text-sm">{desc}</div>
+              <div key={title as string} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-xl p-4">
+                <div className="text-lg font-bold text-gray-800 dark:text-white mb-1">{title}</div>
+                <div className="text-gray-500 dark:text-white/60 text-sm">{desc}</div>
               </div>
             ))}
           </div>
@@ -375,7 +376,6 @@ function rowToWord(row: string[], idx: number): ExtractedWord {
     const rest = cleaned.filter((_, i) => i !== chineseCol);
     py = rest[0] ?? ""; meaning = rest[1] ?? ""; example = rest[2] ?? "";
   }
-  // Auto-fill pinyin and meaning if missing
   if (!py && chinese) py = autoPinyin(chinese);
   if (!meaning && chinese) meaning = guessMeaning(chinese);
   return { id: `import-${Date.now()}-${idx}`, chinese, pinyin: py, meaning, example, selected: chinese.length > 0 };
@@ -419,12 +419,12 @@ async function parseExcel(file: File): Promise<ExtractedWord[]> {
 function WordRow({ word, onChange, onRemove }: { word: ExtractedWord; onChange: (u: ExtractedWord) => void; onRemove: () => void }) {
   function upd(field: keyof ExtractedWord, val: string | boolean) { onChange({ ...word, [field]: val }); }
   return (
-    <tr className={`border-b transition ${word.selected ? "bg-white" : "bg-gray-50 opacity-60"}`}>
+    <tr className={`border-b border-gray-100 dark:border-white/[0.06] transition ${word.selected ? "bg-white dark:bg-transparent" : "bg-gray-50 dark:bg-white/[0.02] opacity-60"}`}>
       <td className="px-3 py-2 text-center"><input type="checkbox" checked={word.selected} onChange={(e) => upd("selected", e.target.checked)} className="w-4 h-4 accent-blue-600" /></td>
-      <td className="px-3 py-2"><input value={word.chinese} onChange={(e) => upd("chinese", e.target.value)} className="w-full text-xl font-bold text-gray-800 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="漢字" /></td>
-      <td className="px-3 py-2"><input value={word.pinyin} onChange={(e) => upd("pinyin", e.target.value)} className="w-full text-sm text-purple-600 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="pīnyīn" /></td>
-      <td className="px-3 py-2"><input value={word.meaning} onChange={(e) => upd("meaning", e.target.value)} className="w-full text-sm text-gray-700 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="meaning" /></td>
-      <td className="px-3 py-2"><input value={word.example} onChange={(e) => upd("example", e.target.value)} className="w-full text-sm text-gray-400 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="example (optional)" /></td>
+      <td className="px-3 py-2"><input value={word.chinese} onChange={(e) => upd("chinese", e.target.value)} className="w-full text-xl font-bold text-gray-800 dark:text-white border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="漢字" /></td>
+      <td className="px-3 py-2"><input value={word.pinyin} onChange={(e) => upd("pinyin", e.target.value)} className="w-full text-sm text-purple-600 dark:text-purple-400 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="pīnyīn" /></td>
+      <td className="px-3 py-2"><input value={word.meaning} onChange={(e) => upd("meaning", e.target.value)} className="w-full text-sm text-gray-700 dark:text-white/80 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="meaning" /></td>
+      <td className="px-3 py-2"><input value={word.example} onChange={(e) => upd("example", e.target.value)} className="w-full text-sm text-gray-400 dark:text-white/40 border-b border-transparent hover:border-blue-300 focus:border-blue-500 focus:outline-none bg-transparent" placeholder="example (optional)" /></td>
       <td className="px-3 py-2 text-center"><button onClick={onRemove} className="text-red-400 hover:text-red-600 text-lg">×</button></td>
     </tr>
   );
@@ -461,18 +461,18 @@ function WordListTab() {
 
   return (
     <div>
-      <div className="bg-white/10 rounded-2xl p-4 mb-5">
-        <p className="text-white/70 text-xs font-bold uppercase tracking-wide mb-3">Supported formats</p>
+      <div className="bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-4 mb-5">
+        <p className="text-gray-500 dark:text-white/70 text-xs font-bold uppercase tracking-wide mb-3">Supported formats</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
           {[
             ["📄 TXT", "One word per line. Tab / comma / 2+ spaces as delimiter.", "學校  xuéxiào  school"],
             ["📊 CSV", "Comma-separated. Optional header. 2–4 columns.", "學校,xuéxiào,school"],
             ["📗 Excel", "First sheet. Columns: Chinese | Pinyin | Meaning | Example.", "Column A → 漢字"],
           ].map(([title, desc, ex]) => (
-            <div key={title as string} className="bg-white/10 rounded-xl p-3">
-              <div className="text-white font-bold mb-1">{title}</div>
-              <p className="text-white/60 text-xs mb-1">{desc}</p>
-              <pre className="text-green-300 text-xs font-mono">{ex}</pre>
+            <div key={title as string} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.06] rounded-xl p-3">
+              <div className="text-gray-800 dark:text-white font-bold mb-1">{title}</div>
+              <p className="text-gray-500 dark:text-white/60 text-xs mb-1">{desc}</p>
+              <pre className="text-green-600 dark:text-green-300 text-xs font-mono">{ex}</pre>
             </div>
           ))}
         </div>
@@ -482,26 +482,26 @@ function WordListTab() {
         <div onDragOver={(e) => { e.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)}
           onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
           onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition mb-5 ${dragging ? "border-yellow-400 bg-yellow-400/10" : "border-white/30 hover:border-white/60 bg-white/5 hover:bg-white/10"}`}>
+          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition mb-5 ${dragging ? "border-blue-400 bg-blue-50 dark:bg-blue-500/10" : "border-gray-300 dark:border-white/[0.15] hover:border-gray-400 dark:hover:border-white/30 bg-gray-50 dark:bg-white/[0.03] hover:bg-gray-100 dark:hover:bg-white/[0.06]"}`}>
           <input ref={fileRef} type="file" accept=".txt,.csv,.xlsx,.xls" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = ""; }} />
           <div className="text-5xl mb-3">{status === "parsing" ? "⏳" : "📂"}</div>
-          <p className="text-white font-bold text-lg mb-1">{status === "parsing" ? "Parsing…" : "Drop file or click to browse"}</p>
-          <p className="text-white/50 text-sm">TXT · CSV · Excel</p>
-          {fileName && status !== "parsing" && <p className="text-yellow-300 text-sm mt-2">📎 {fileName}</p>}
+          <p className="text-gray-700 dark:text-white font-bold text-lg mb-1">{status === "parsing" ? "Parsing…" : "Drop file or click to browse"}</p>
+          <p className="text-gray-500 dark:text-white/50 text-sm">TXT · CSV · Excel</p>
+          {fileName && status !== "parsing" && <p className="text-blue-600 dark:text-yellow-300 text-sm mt-2">📎 {fileName}</p>}
         </div>
       )}
 
-      {error && <div className="bg-red-500/20 border border-red-400/40 text-red-200 rounded-xl p-4 mb-5">{error}</div>}
+      {error && <div className="bg-red-50 dark:bg-red-500/20 border border-red-200 dark:border-red-400/40 text-red-700 dark:text-red-200 rounded-xl p-4 mb-5">{error}</div>}
 
       {status === "saved" && (
-        <div className="bg-white rounded-2xl p-8 text-center shadow-xl mb-5">
+        <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center shadow-xl mb-5">
           <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Saved!</h2>
-          <p className="text-gray-500 mb-6">{savedCount} new word{savedCount !== 1 ? "s" : ""} added to My Words.</p>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Saved!</h2>
+          <p className="text-gray-500 dark:text-white/50 mb-6">{savedCount} new word{savedCount !== 1 ? "s" : ""} added to My Words.</p>
           <div className="flex gap-3 justify-center">
             <Link href="/vocabulary" className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Go to My Words →</Link>
             <button onClick={() => { setWords([]); setStatus("idle"); setFileName(""); setSavedCount(0); }}
-              className="border-2 border-gray-300 text-gray-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition">Import Another</button>
+              className="border-2 border-gray-300 dark:border-white/[0.1] text-gray-600 dark:text-white px-6 py-3 rounded-xl font-bold hover:bg-gray-50 dark:hover:bg-white/[0.08] transition">Import Another</button>
           </div>
         </div>
       )}
@@ -509,26 +509,26 @@ function WordListTab() {
       {status === "done" && words.length > 0 && (
         <div>
           <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-            <span className="text-white font-bold">{words.length} words found <span className="text-white/50 text-sm font-normal">from {fileName}</span></span>
+            <span className="text-gray-800 dark:text-white font-bold">{words.length} words found <span className="text-gray-500 dark:text-white/50 text-sm font-normal">from {fileName}</span></span>
             <div className="flex gap-2">
               <button onClick={() => setWords((p) => [...p, { id: `manual-${Date.now()}`, chinese: "", pinyin: "", meaning: "", example: "", selected: true }])}
-                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition">+ Add Row</button>
+                className="bg-gray-100 dark:bg-white/[0.08] hover:bg-gray-200 dark:hover:bg-white/[0.12] text-gray-700 dark:text-white px-4 py-2 rounded-xl text-sm font-medium transition">+ Add Row</button>
               <button onClick={() => { setWords([]); setStatus("idle"); setFileName(""); }}
-                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl text-sm font-medium transition">↩ Re-upload</button>
+                className="bg-gray-100 dark:bg-white/[0.08] hover:bg-gray-200 dark:hover:bg-white/[0.12] text-gray-700 dark:text-white px-4 py-2 rounded-xl text-sm font-medium transition">↩ Re-upload</button>
             </div>
           </div>
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-5">
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-xl overflow-hidden mb-5">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-gray-50 border-b">
+                  <tr className="bg-gray-50 dark:bg-white/[0.04] border-b border-gray-200 dark:border-white/[0.08]">
                     <th className="px-3 py-3 text-center w-10">
                       <input type="checkbox" checked={words.every((w) => w.selected)} onChange={(e) => setWords((p) => p.map((w) => ({ ...w, selected: e.target.checked })))} className="w-4 h-4 accent-blue-600" />
                     </th>
-                    <th className="px-3 py-3 text-left font-bold text-gray-700">Chinese</th>
-                    <th className="px-3 py-3 text-left font-bold text-gray-700">Pinyin</th>
-                    <th className="px-3 py-3 text-left font-bold text-gray-700">Meaning</th>
-                    <th className="px-3 py-3 text-left font-bold text-gray-700">Example</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-700 dark:text-white/80">Chinese</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-700 dark:text-white/80">Pinyin</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-700 dark:text-white/80">Meaning</th>
+                    <th className="px-3 py-3 text-left font-bold text-gray-700 dark:text-white/80">Example</th>
                     <th className="px-3 py-3 w-10"></th>
                   </tr>
                 </thead>
@@ -542,10 +542,10 @@ function WordListTab() {
               </table>
             </div>
           </div>
-          <div className="bg-white/15 backdrop-blur rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap sticky bottom-4">
-            <p className="text-white text-sm"><span className="font-bold text-lg">{selectedCount}</span> word{selectedCount !== 1 ? "s" : ""} selected</p>
+          <div className="bg-gray-50 dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] backdrop-blur rounded-2xl p-4 flex items-center justify-between gap-4 flex-wrap sticky bottom-4">
+            <p className="text-gray-700 dark:text-white text-sm"><span className="font-bold text-lg">{selectedCount}</span> word{selectedCount !== 1 ? "s" : ""} selected</p>
             <button onClick={handleConfirm} disabled={selectedCount === 0}
-              className={`px-8 py-3 rounded-xl font-bold text-base transition ${selectedCount > 0 ? "bg-white text-blue-700 hover:bg-blue-50 shadow-lg" : "bg-white/30 text-white/50 cursor-not-allowed"}`}>
+              className={`px-8 py-3 rounded-xl font-bold text-base transition ${selectedCount > 0 ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-90 shadow-lg" : "bg-gray-200 dark:bg-white/[0.1] text-gray-400 dark:text-white/30 cursor-not-allowed"}`}>
               ✓ Save {selectedCount > 0 ? `(${selectedCount})` : ""}
             </button>
           </div>
@@ -562,28 +562,34 @@ function WordListTab() {
 type MainTab = "extract" | "wordlist";
 
 export default function ImportPage() {
+  const { theme, toggle } = useTheme();
   const [mainTab, setMainTab] = useState<MainTab>("extract");
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-700 via-blue-800 to-indigo-800 py-8 px-4">
-      <div className="max-w-5xl mx-auto">
-        <Link href="/" className="text-white/70 hover:text-white text-sm mb-6 inline-block">← Back to Home</Link>
-
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+        <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+        <h1 className="font-bold text-sm">📥 Vocabulary Import</h1>
+        <button onClick={toggle} className="text-lg">
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+      </header>
+      <div className="max-w-5xl mx-auto py-8 px-4">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl">📥</div>
+          <div className="w-16 h-16 rounded-2xl bg-gray-200 dark:bg-white/[0.08] flex items-center justify-center text-3xl">📥</div>
           <div>
-            <h1 className="text-3xl font-bold text-white">Vocabulary Import</h1>
-            <p className="text-white/60">Extract words from any document, or import a structured word list</p>
+            <h2 className="text-2xl font-bold">Vocabulary Import</h2>
+            <p className="text-gray-500 dark:text-white/60">Extract words from any document, or import a structured word list</p>
           </div>
         </div>
 
         {/* Main tabs */}
-        <div className="flex gap-2 mb-6 border-b border-white/20 pb-4">
+        <div className="flex gap-2 mb-6 border-b border-gray-200 dark:border-white/[0.08] pb-4">
           {([
             ["extract", "📄 Extract from Document"],
             ["wordlist", "📋 Import Word List"],
           ] as [MainTab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setMainTab(t)}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition ${mainTab === t ? "bg-white text-blue-800" : "bg-white/10 text-white hover:bg-white/20"}`}>
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition ${mainTab === t ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900" : "bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-white/[0.1]"}`}>
               {label}
             </button>
           ))}

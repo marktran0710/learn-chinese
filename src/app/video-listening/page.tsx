@@ -7,6 +7,7 @@ import {
   loadCustomEpisodes, saveCustomEpisode, deleteCustomEpisode,
   addXP, addCompletedLesson,
 } from "@/lib/storage";
+import { useTheme } from "@/lib/theme";
 
 // ── YouTube IFrame API types ──────────────────────────────────────────────────
 declare global {
@@ -159,9 +160,9 @@ function AddVideoPanel({ onSaved }: { onSaved: (ep: VideoEpisode) => void }) {
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur rounded-2xl p-6 mb-8">
-      <h2 className="text-xl font-bold text-white mb-1">➕ Add a YouTube Video</h2>
-      <p className="text-white/60 text-sm mb-4">
+    <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 mb-8">
+      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-1">➕ Add a YouTube Video</h2>
+      <p className="text-gray-500 dark:text-white/60 text-sm mb-4">
         Paste any YouTube link. We'll fetch captions or download & transcribe the audio, then
         Claude adds pinyin, English, vocabulary & quiz questions automatically.
       </p>
@@ -174,7 +175,7 @@ function AddVideoPanel({ onSaved }: { onSaved: (ep: VideoEpisode) => void }) {
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && !running && process()}
           disabled={running}
-          className="flex-1 rounded-xl px-4 py-3 text-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60"
+          className="flex-1 bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
         />
         <button
           onClick={process}
@@ -187,9 +188,9 @@ function AddVideoPanel({ onSaved }: { onSaved: (ep: VideoEpisode) => void }) {
 
       {/* Progress log */}
       {logs.length > 0 && (
-        <div className="bg-black/30 rounded-xl p-4 text-sm font-mono space-y-1 max-h-48 overflow-y-auto">
+        <div className="bg-gray-900 dark:bg-black/40 rounded-xl p-4 text-sm font-mono space-y-1 max-h-48 overflow-y-auto">
           {logs.map((l, i) => (
-            <div key={i} className="text-green-300">{l}</div>
+            <div key={i} className="text-green-400">{l}</div>
           ))}
           {running && (
             <div className="text-yellow-300 animate-pulse">⏳ Working…</div>
@@ -199,26 +200,26 @@ function AddVideoPanel({ onSaved }: { onSaved: (ep: VideoEpisode) => void }) {
       )}
 
       {error && (
-        <div className="mt-3 bg-red-500/20 border border-red-400/40 rounded-xl p-4">
-          <p className="text-red-200 text-sm font-bold mb-1">Error</p>
-          <p className="text-red-300 text-sm">{error}</p>
+        <div className="mt-3 bg-red-50 dark:bg-red-500/20 border border-red-200 dark:border-red-400/40 rounded-xl p-4">
+          <p className="text-red-700 dark:text-red-200 text-sm font-bold mb-1">Error</p>
+          <p className="text-red-600 dark:text-red-300 text-sm">{error}</p>
           {error.includes("OPENAI_API_KEY") && (
-            <p className="text-yellow-200 text-xs mt-2">
-              Add your OpenAI key to <code className="bg-black/30 px-1 rounded">.env.local</code>:
-              &nbsp;<code className="bg-black/30 px-1 rounded">OPENAI_API_KEY=sk-...</code>
+            <p className="text-orange-600 dark:text-yellow-200 text-xs mt-2">
+              Add your OpenAI key to <code className="bg-gray-100 dark:bg-black/30 px-1 rounded">.env.local</code>:
+              &nbsp;<code className="bg-gray-100 dark:bg-black/30 px-1 rounded">OPENAI_API_KEY=sk-...</code>
             </p>
           )}
           {error.includes("ANTHROPIC") && (
-            <p className="text-yellow-200 text-xs mt-2">
-              Add your Anthropic key to <code className="bg-black/30 px-1 rounded">.env.local</code>:
-              &nbsp;<code className="bg-black/30 px-1 rounded">ANTHROPIC_API_KEY=sk-ant-...</code>
+            <p className="text-orange-600 dark:text-yellow-200 text-xs mt-2">
+              Add your Anthropic key to <code className="bg-gray-100 dark:bg-black/30 px-1 rounded">.env.local</code>:
+              &nbsp;<code className="bg-gray-100 dark:bg-black/30 px-1 rounded">ANTHROPIC_API_KEY=sk-ant-...</code>
             </p>
           )}
         </div>
       )}
 
       {done && (
-        <div className="mt-3 bg-green-500/20 border border-green-400/40 rounded-xl p-3 text-green-200 text-sm font-bold">
+        <div className="mt-3 bg-green-50 dark:bg-green-500/20 border border-green-200 dark:border-green-400/40 rounded-xl p-3 text-green-700 dark:text-green-200 text-sm font-bold">
           ✅ Video added! Scroll down to find it in your library.
         </div>
       )}
@@ -245,7 +246,7 @@ function TranscriptPanel({
 
   if (!transcript.length) {
     return (
-      <div className="flex flex-col items-center justify-center h-40 text-white/40 text-sm">
+      <div className="flex flex-col items-center justify-center h-40 text-gray-400 dark:text-white/40 text-sm">
         No transcript available for this video.
       </div>
     );
@@ -262,23 +263,23 @@ function TranscriptPanel({
             onClick={() => onSeek(line.start)}
             className={`rounded-xl px-4 py-3 cursor-pointer transition-all border-2 ${
               isActive
-                ? "bg-yellow-50 border-yellow-400 shadow-md"
-                : "bg-white border-transparent hover:border-blue-200 hover:bg-blue-50"
+                ? "bg-yellow-50 dark:bg-yellow-400/10 border-yellow-400 shadow-md"
+                : "bg-white dark:bg-white/[0.03] border-transparent hover:border-blue-200 dark:hover:border-white/[0.1] hover:bg-gray-50 dark:hover:bg-white/[0.06]"
             }`}
           >
             <div className="flex items-start gap-3">
-              <span className={`text-xs font-mono mt-1 shrink-0 ${isActive ? "text-yellow-600 font-bold" : "text-gray-300"}`}>
+              <span className={`text-xs font-mono mt-1 shrink-0 ${isActive ? "text-yellow-600 font-bold" : "text-gray-300 dark:text-white/25"}`}>
                 {fmtTime(line.start)}
               </span>
               <div className="flex-1 min-w-0">
-                <p className={`text-lg leading-snug font-medium ${isActive ? "text-gray-900" : "text-gray-700"}`}>
+                <p className={`text-lg leading-snug font-medium ${isActive ? "text-gray-900" : "text-gray-700 dark:text-white"}`}>
                   {line.chinese}
                 </p>
                 {showPinyin && line.pinyin && (
-                  <p className="text-sm text-purple-500 mt-0.5 leading-snug">{line.pinyin}</p>
+                  <p className="text-sm text-purple-500 dark:text-purple-400 mt-0.5 leading-snug">{line.pinyin}</p>
                 )}
                 {showEnglish && line.english && (
-                  <p className="text-xs text-gray-400 mt-0.5 leading-snug italic">{line.english}</p>
+                  <p className="text-xs text-gray-400 dark:text-white/40 mt-0.5 leading-snug italic">{line.english}</p>
                 )}
               </div>
             </div>
@@ -298,8 +299,8 @@ function QuizPanel({ episode, onDone }: { episode: VideoEpisode; onDone: () => v
 
   if (!episode.questions?.length) {
     return (
-      <div className="bg-white rounded-2xl p-8 text-center">
-        <p className="text-gray-500">No quiz questions generated for this video.</p>
+      <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center">
+        <p className="text-gray-500 dark:text-white/50">No quiz questions generated for this video.</p>
         <button onClick={onDone} className="mt-4 bg-blue-500 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-600">
           Back
         </button>
@@ -325,10 +326,10 @@ function QuizPanel({ episode, onDone }: { episode: VideoEpisode; onDone: () => v
   if (finished) {
     const pct = Math.round((score / episode.questions.length) * 100);
     return (
-      <div className="bg-white rounded-2xl p-8 text-center shadow-xl">
+      <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-8 text-center shadow-xl">
         <div className="text-5xl mb-3">{pct >= 70 ? "🏆" : "📚"}</div>
-        <h3 className="text-2xl font-bold text-gray-800 mb-1">{pct >= 70 ? "Great listening!" : "Keep practicing!"}</h3>
-        <p className="text-gray-500 mb-5">{score}/{episode.questions.length} correct ({pct}%)</p>
+        <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-1">{pct >= 70 ? "Great listening!" : "Keep practicing!"}</h3>
+        <p className="text-gray-500 dark:text-white/50 mb-5">{score}/{episode.questions.length} correct ({pct}%)</p>
         <button onClick={onDone} className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-bold hover:opacity-90 transition">
           ← Back to Video
         </button>
@@ -338,20 +339,20 @@ function QuizPanel({ episode, onDone }: { episode: VideoEpisode; onDone: () => v
 
   return (
     <div>
-      <p className="text-sm text-white/70 mb-3">Question {qIdx + 1} / {episode.questions.length}</p>
-      <div className="bg-white rounded-2xl p-5 shadow-xl mb-4">
-        <p className="text-lg font-bold text-gray-800">{q.question}</p>
+      <p className="text-sm text-gray-500 dark:text-white/70 mb-3">Question {qIdx + 1} / {episode.questions.length}</p>
+      <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 shadow-xl mb-4">
+        <p className="text-lg font-bold text-gray-800 dark:text-white">{q.question}</p>
       </div>
       <div className="flex flex-col gap-3">
         {q.options.map((opt, i) => {
           let cls = "p-4 rounded-xl text-left border-2 font-medium transition text-base ";
-          if (selected === null) cls += "bg-white border-white hover:border-blue-400 hover:bg-blue-50 text-gray-800";
-          else if (i === q.answer) cls += "bg-green-100 border-green-500 text-green-800";
-          else if (i === selected) cls += "bg-red-100 border-red-400 text-red-700";
-          else cls += "bg-white/60 border-white/30 text-gray-400";
+          if (selected === null) cls += "bg-white dark:bg-white/[0.06] border-gray-200 dark:border-white/[0.1] hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/20 text-gray-800 dark:text-white";
+          else if (i === q.answer) cls += "bg-green-100 dark:bg-green-500/20 border-green-500 text-green-800 dark:text-green-300";
+          else if (i === selected) cls += "bg-red-100 dark:bg-red-500/20 border-red-400 text-red-700 dark:text-red-300";
+          else cls += "bg-white/60 dark:bg-white/[0.02] border-gray-200 dark:border-white/[0.05] text-gray-400 dark:text-white/30";
           return (
             <button key={i} onClick={() => pick(i)} className={cls}>
-              <span className="font-bold mr-2 text-gray-400">{String.fromCharCode(65 + i)}.</span>
+              <span className="font-bold mr-2 text-gray-400 dark:text-white/40">{String.fromCharCode(65 + i)}.</span>
               {opt}
             </button>
           );
@@ -414,50 +415,50 @@ function EpisodePlayer({ episode, onBack }: { episode: VideoEpisode; onBack: () 
 
   return (
     <div>
-      <button onClick={onBack} className="text-white hover:text-gray-200 mb-5 inline-flex items-center gap-2">
+      <button onClick={onBack} className="text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white mb-5 inline-flex items-center gap-2 transition">
         ← Back to Library
       </button>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-bold text-white">{episode.titleZh || episode.title}</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{episode.titleZh || episode.title}</h2>
         {episode.description && (
-          <p className="text-white/60 text-sm mt-1">{episode.description}</p>
+          <p className="text-gray-500 dark:text-white/60 text-sm mt-1">{episode.description}</p>
         )}
         <div className="flex gap-3 mt-2 flex-wrap">
           {episode.level && episode.level !== "?" && (
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">Level {episode.level}</span>
+            <span className="text-xs bg-gray-100 dark:bg-white/[0.1] text-gray-600 dark:text-white px-2 py-0.5 rounded-full">Level {episode.level}</span>
           )}
           {episode.duration ? (
-            <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">⏱ {fmtDuration(episode.duration)}</span>
+            <span className="text-xs bg-gray-100 dark:bg-white/[0.1] text-gray-600 dark:text-white px-2 py-0.5 rounded-full">⏱ {fmtDuration(episode.duration)}</span>
           ) : null}
-          <span className="text-xs bg-white/20 text-white px-2 py-0.5 rounded-full">🎬 {episode.transcript.length} lines</span>
+          <span className="text-xs bg-gray-100 dark:bg-white/[0.1] text-gray-600 dark:text-white px-2 py-0.5 rounded-full">🎬 {episode.transcript.length} lines</span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Left */}
         <div>
-          <div className="rounded-2xl overflow-hidden aspect-video bg-black">
+          <div className="rounded-2xl overflow-hidden aspect-video bg-gray-900">
             <div ref={containerRef} className="w-full h-full" />
           </div>
 
           <div className="flex gap-2 mt-4 flex-wrap">
             <button
               onClick={() => setShowPinyin((v) => !v)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${showPinyin ? "bg-purple-500 text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${showPinyin ? "bg-purple-500 text-white" : "bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/[0.12]"}`}
             >
               拼音 {showPinyin ? "ON" : "OFF"}
             </button>
             <button
               onClick={() => setShowEnglish((v) => !v)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${showEnglish ? "bg-teal-500 text-white" : "bg-white/20 text-white hover:bg-white/30"}`}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition ${showEnglish ? "bg-teal-500 text-white" : "bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/[0.12]"}`}
             >
               English {showEnglish ? "ON" : "OFF"}
             </button>
             {episode.vocab?.length > 0 && (
               <button
                 onClick={() => setShowVocab((v) => !v)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition ${showVocab ? "bg-yellow-500 text-gray-900" : "bg-white/20 text-white hover:bg-white/30"}`}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition ${showVocab ? "bg-yellow-500 text-gray-900" : "bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-white/[0.12]"}`}
               >
                 📖 Vocab
               </button>
@@ -465,7 +466,7 @@ function EpisodePlayer({ episode, onBack }: { episode: VideoEpisode; onBack: () 
             {phase === "watch" && episode.questions?.length > 0 && (
               <button
                 onClick={() => setPhase("quiz")}
-                className="ml-auto px-4 py-2 rounded-xl text-sm font-bold bg-white text-blue-700 hover:bg-blue-50 transition"
+                className="ml-auto px-4 py-2 rounded-xl text-sm font-bold bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-90 transition"
               >
                 Take Quiz →
               </button>
@@ -473,14 +474,14 @@ function EpisodePlayer({ episode, onBack }: { episode: VideoEpisode; onBack: () 
           </div>
 
           {showVocab && episode.vocab?.length > 0 && (
-            <div className="bg-white rounded-2xl p-4 mt-4 shadow-lg">
-              <h3 className="font-bold text-gray-700 mb-3 text-sm uppercase tracking-wide">Key Vocabulary</h3>
+            <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-4 mt-4 shadow-lg">
+              <h3 className="font-bold text-gray-700 dark:text-white/80 mb-3 text-sm uppercase tracking-wide">Key Vocabulary</h3>
               <div className="grid grid-cols-2 gap-2">
                 {episode.vocab.map((v) => (
-                  <div key={v.chinese} className="bg-gray-50 rounded-xl p-2">
-                    <p className="font-bold text-gray-800 text-lg leading-tight">{v.chinese}</p>
-                    <p className="text-purple-500 text-xs">{v.pinyin}</p>
-                    <p className="text-gray-500 text-xs">{v.meaning}</p>
+                  <div key={v.chinese} className="bg-gray-50 dark:bg-white/[0.03] rounded-xl p-2">
+                    <p className="font-bold text-gray-800 dark:text-white text-lg leading-tight">{v.chinese}</p>
+                    <p className="text-purple-500 dark:text-purple-400 text-xs">{v.pinyin}</p>
+                    <p className="text-gray-500 dark:text-white/50 text-xs">{v.meaning}</p>
                   </div>
                 ))}
               </div>
@@ -491,8 +492,8 @@ function EpisodePlayer({ episode, onBack }: { episode: VideoEpisode; onBack: () 
         {/* Right */}
         <div>
           {phase === "watch" ? (
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-4">
-              <p className="text-white/70 text-xs font-bold uppercase tracking-wide mb-3">
+            <div className="bg-gray-50 dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-4">
+              <p className="text-gray-500 dark:text-white/70 text-xs font-bold uppercase tracking-wide mb-3">
                 Transcript — click any line to jump
               </p>
               <TranscriptPanel
@@ -525,7 +526,7 @@ function EpisodeCard({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
+    <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
       {ep.thumbnailUrl && (
         <div className="relative aspect-video bg-gray-900">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -542,17 +543,17 @@ function EpisodeCard({
       )}
       <div className="p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-bold text-gray-800 text-base leading-snug line-clamp-2">{ep.titleZh || ep.title}</h3>
+          <h3 className="font-bold text-gray-800 dark:text-white text-base leading-snug line-clamp-2">{ep.titleZh || ep.title}</h3>
           <div className="flex gap-1 shrink-0">
             {ep.level && ep.level !== "?" && (
-              <span className="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-lg">{ep.level}</span>
+              <span className="text-xs font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-lg">{ep.level}</span>
             )}
           </div>
         </div>
         {ep.description && (
-          <p className="text-gray-500 text-xs leading-snug mb-3 line-clamp-2">{ep.description}</p>
+          <p className="text-gray-500 dark:text-white/50 text-xs leading-snug mb-3 line-clamp-2">{ep.description}</p>
         )}
-        <div className="flex gap-3 text-xs text-gray-400 mb-4">
+        <div className="flex gap-3 text-xs text-gray-400 dark:text-white/40 mb-4">
           <span>🎬 {ep.transcript.length} lines</span>
           {ep.vocab?.length > 0 && <span>📖 {ep.vocab.length} vocab</span>}
           {ep.questions?.length > 0 && <span>❓ {ep.questions.length} questions</span>}
@@ -586,7 +587,7 @@ function EpisodeCard({
             <button
               onClick={() => setConfirmDelete(true)}
               title="Remove video"
-              className="px-3 py-2 bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-400 rounded-xl text-sm transition"
+              className="px-3 py-2 bg-gray-100 dark:bg-white/[0.08] hover:bg-red-50 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-xl text-sm transition"
             >
               🗑
             </button>
@@ -599,6 +600,7 @@ function EpisodeCard({
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function VideoListeningPage() {
+  const { theme, toggle } = useTheme();
   const [episodes, setEpisodes] = useState<VideoEpisode[]>([]);
   const [selected, setSelected] = useState<VideoEpisode | null>(null);
 
@@ -608,7 +610,6 @@ export default function VideoListeningPage() {
 
   function handleSaved(ep: VideoEpisode) {
     setEpisodes(loadCustomEpisodes());
-    // Auto-open the new episode
     setSelected(ep);
   }
 
@@ -619,8 +620,15 @@ export default function VideoListeningPage() {
 
   if (selected) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8 px-4">
-        <div className="max-w-6xl mx-auto">
+      <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+          <button onClick={() => setSelected(null)} className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Back</button>
+          <h1 className="font-bold text-sm">🎬 Video Listening</h1>
+          <button onClick={toggle} className="text-lg">
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+        </header>
+        <div className="max-w-6xl mx-auto py-8 px-4">
           <EpisodePlayer episode={selected} onBack={() => setSelected(null)} />
         </div>
       </main>
@@ -628,34 +636,37 @@ export default function VideoListeningPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8 px-4">
-      <div className="max-w-5xl mx-auto">
-        <Link href="/" className="text-white hover:text-gray-200 mb-6 inline-block">
-          ← Back to Home
-        </Link>
-
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+        <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+        <h1 className="font-bold text-sm">🎬 Video Listening</h1>
+        <button onClick={toggle} className="text-lg">
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+      </header>
+      <div className="max-w-5xl mx-auto py-8 px-4">
         <div className="flex items-center gap-4 mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center text-3xl">🎬</div>
+          <div className="w-16 h-16 rounded-2xl bg-gray-200 dark:bg-white/[0.08] flex items-center justify-center text-3xl">🎬</div>
           <div>
-            <h1 className="text-4xl font-bold text-white">Video Listening</h1>
-            <p className="text-white/70">Add any YouTube video — transcripts & learning content generated automatically</p>
+            <h2 className="text-3xl font-bold">Video Listening</h2>
+            <p className="text-gray-500 dark:text-white/70">Add any YouTube video — transcripts & learning content generated automatically</p>
           </div>
         </div>
 
         <AddVideoPanel onSaved={handleSaved} />
 
         {episodes.length === 0 ? (
-          <div className="bg-white/10 rounded-2xl p-12 text-center">
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-12 text-center">
             <div className="text-5xl mb-4">🎥</div>
-            <p className="text-white font-bold text-lg mb-2">Your video library is empty</p>
-            <p className="text-white/60 text-sm">
+            <p className="text-gray-700 dark:text-white font-bold text-lg mb-2">Your video library is empty</p>
+            <p className="text-gray-500 dark:text-white/60 text-sm">
               Paste a YouTube link above to get started. Works with any Chinese video —
               captions optional.
             </p>
           </div>
         ) : (
           <>
-            <h2 className="text-white font-bold text-lg mb-4">Your Videos ({episodes.length})</h2>
+            <h2 className="text-gray-800 dark:text-white font-bold text-lg mb-4">Your Videos ({episodes.length})</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {episodes.map((ep) => (
                 <EpisodeCard

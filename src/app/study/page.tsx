@@ -17,6 +17,7 @@ import {
   addXP,
 } from "@/lib/storage";
 import { PronunciationPlayer } from "@/lib/pronunciation";
+import { useTheme } from "@/lib/theme";
 
 type StudyMode = "flashcard" | "quiz" | "review";
 type FlipState = "front" | "back";
@@ -86,13 +87,13 @@ function FlashcardView({
     <div className="max-w-xl mx-auto">
       {/* Progress */}
       <div className="flex items-center gap-4 mb-4">
-        <div className="flex-1 bg-white/20 rounded-full h-2">
+        <div className="flex-1 bg-white/20 dark:bg-white/10 rounded-full h-2">
           <div
-            className="bg-white h-2 rounded-full transition-all"
+            className="bg-gray-900 dark:bg-white h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-white text-sm font-medium">
+        <span className="text-gray-700 dark:text-white text-sm font-medium">
           {idx + 1}/{cards.length}
         </span>
       </div>
@@ -110,7 +111,7 @@ function FlashcardView({
       {/* Card */}
       <div
         onClick={handleFlip}
-        className="bg-white rounded-2xl shadow-2xl p-8 cursor-pointer min-h-64 flex flex-col items-center justify-center text-center mb-4 select-none transition-all hover:shadow-3xl"
+        className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-2xl p-8 cursor-pointer min-h-64 flex flex-col items-center justify-center text-center mb-4 select-none transition-all"
       >
         {flip === "front" ? (
           <>
@@ -119,30 +120,30 @@ function FlashcardView({
             >
               {card.level}
             </div>
-            <div className="text-7xl font-bold text-gray-800 mb-3">
+            <div className="text-7xl font-bold text-gray-800 dark:text-white mb-3">
               {card.traditional}
             </div>
-            <div className="text-2xl text-purple-600 font-medium">
+            <div className="text-2xl text-purple-600 dark:text-purple-400 font-medium">
               {card.pinyin}
             </div>
-            <p className="text-gray-400 text-sm mt-6">Tap to reveal meaning →</p>
+            <p className="text-gray-400 dark:text-white/40 text-sm mt-6">Tap to reveal meaning →</p>
           </>
         ) : (
           <>
-            <div className="text-4xl font-bold text-gray-800 mb-2">
+            <div className="text-4xl font-bold text-gray-800 dark:text-white mb-2">
               {card.traditional}
             </div>
-            <div className="text-lg text-purple-600 mb-2">{card.pinyin}</div>
-            <div className="text-2xl font-semibold text-gray-700 mb-3">
+            <div className="text-lg text-purple-600 dark:text-purple-400 mb-2">{card.pinyin}</div>
+            <div className="text-2xl font-semibold text-gray-700 dark:text-white/90 mb-3">
               {card.meaning}
             </div>
-            <span className="text-sm text-gray-400 italic capitalize">
+            <span className="text-sm text-gray-400 dark:text-white/40 italic capitalize">
               {card.partOfSpeech}
             </span>
             {card.example && (
-              <div className="mt-4 bg-gray-50 rounded-xl p-4 text-left w-full">
-                <p className="text-gray-800 font-medium text-sm">{card.example}</p>
-                <p className="text-gray-500 text-xs mt-1">{card.exampleTranslation}</p>
+              <div className="mt-4 bg-gray-50 dark:bg-white/[0.03] rounded-xl p-4 text-left w-full">
+                <p className="text-gray-800 dark:text-white/90 font-medium text-sm">{card.example}</p>
+                <p className="text-gray-500 dark:text-white/50 text-xs mt-1">{card.exampleTranslation}</p>
               </div>
             )}
           </>
@@ -156,7 +157,7 @@ function FlashcardView({
             e.stopPropagation();
             playAudio();
           }}
-          className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition text-sm"
+          className="bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-white/20 transition text-sm"
         >
           🔊 Pronunciation
         </button>
@@ -235,23 +236,23 @@ function QuizView({
   return (
     <div className="max-w-xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
-        <div className="flex-1 bg-white/20 rounded-full h-2">
+        <div className="flex-1 bg-white/20 dark:bg-white/10 rounded-full h-2">
           <div
-            className="bg-white h-2 rounded-full transition-all"
+            className="bg-gray-900 dark:bg-white h-2 rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="text-white text-sm">{idx + 1}/{cards.length}</span>
-        <span className="text-green-300 text-sm font-bold">Score: {score}</span>
+        <span className="text-gray-700 dark:text-white text-sm">{idx + 1}/{cards.length}</span>
+        <span className="text-green-600 dark:text-green-300 text-sm font-bold">Score: {score}</span>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl p-8 mb-4">
-        <p className="text-gray-500 text-sm mb-2">What does this mean?</p>
+      <div className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-xl p-8 mb-4">
+        <p className="text-gray-500 dark:text-white/50 text-sm mb-2">What does this mean?</p>
         <div className="text-center mb-6">
-          <div className="text-6xl font-bold text-gray-800 mb-2">
+          <div className="text-6xl font-bold text-gray-800 dark:text-white mb-2">
             {card.traditional}
           </div>
-          <div className="text-xl text-purple-600">{card.pinyin}</div>
+          <div className="text-xl text-purple-600 dark:text-purple-400">{card.pinyin}</div>
         </div>
 
         <div className="space-y-3">
@@ -261,12 +262,12 @@ function QuizView({
             if (!showFeedback) {
               cls +=
                 selected === i
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 hover:border-blue-300 hover:bg-blue-50";
+                  ? "border-blue-500 bg-blue-50 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300"
+                  : "border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white/80 hover:border-blue-300 hover:bg-blue-50 dark:hover:bg-white/[0.08]";
             } else {
-              if (opt === card.meaning) cls += "border-green-500 bg-green-50 text-green-800";
-              else if (i === selected) cls += "border-red-400 bg-red-50 text-red-700";
-              else cls += "border-gray-100 text-gray-400";
+              if (opt === card.meaning) cls += "border-green-500 bg-green-50 dark:bg-green-500/20 text-green-800 dark:text-green-300";
+              else if (i === selected) cls += "border-red-400 bg-red-50 dark:bg-red-500/20 text-red-700 dark:text-red-300";
+              else cls += "border-gray-100 dark:border-white/[0.05] text-gray-400 dark:text-white/30";
             }
             return (
               <button key={i} onClick={() => handleSelect(i)} className={cls}>
@@ -279,9 +280,9 @@ function QuizView({
         {showFeedback && (
           <div className="mt-4">
             {card.example && (
-              <div className="bg-gray-50 rounded-xl p-3 text-sm">
-                <p className="font-medium text-gray-700">{card.example}</p>
-                <p className="text-gray-500 mt-1">{card.exampleTranslation}</p>
+              <div className="bg-gray-50 dark:bg-white/[0.03] rounded-xl p-3 text-sm">
+                <p className="font-medium text-gray-700 dark:text-white/80">{card.example}</p>
+                <p className="text-gray-500 dark:text-white/50 mt-1">{card.exampleTranslation}</p>
               </div>
             )}
             <button
@@ -300,10 +301,10 @@ function QuizView({
 // ── Done Screen ───────────────────────────────────────────────────────────────
 function DoneScreen({ onRestart }: { onRestart: () => void }) {
   return (
-    <div className="max-w-md mx-auto bg-white rounded-2xl shadow-xl p-8 text-center">
+    <div className="max-w-md mx-auto bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-xl p-8 text-center">
       <div className="text-5xl mb-4">🎉</div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Session Complete!</h2>
-      <p className="text-gray-500 mb-6">Great work. Your progress has been saved.</p>
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Session Complete!</h2>
+      <p className="text-gray-500 dark:text-white/50 mb-6">Great work. Your progress has been saved.</p>
       <div className="flex gap-3">
         <button
           onClick={onRestart}
@@ -313,7 +314,7 @@ function DoneScreen({ onRestart }: { onRestart: () => void }) {
         </button>
         <Link
           href="/"
-          className="flex-1 border-2 border-gray-300 text-gray-600 py-3 rounded-xl font-bold text-center hover:bg-gray-50"
+          className="flex-1 border-2 border-gray-300 dark:border-white/[0.1] text-gray-600 dark:text-white/70 py-3 rounded-xl font-bold text-center hover:bg-gray-50 dark:hover:bg-white/[0.08]"
         >
           Home
         </Link>
@@ -324,6 +325,7 @@ function DoneScreen({ onRestart }: { onRestart: () => void }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function StudyPage() {
+  const { theme, toggle } = useTheme();
   const [mode, setMode] = useState<StudyMode | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<HSKLevel | "due" | "all">("all");
   const [studyCards, setStudyCards] = useState<VocabEntry[] | null>(null);
@@ -361,27 +363,29 @@ export default function StudyPage() {
 
   const levels = getAllLevels();
 
-  // Selecting mode and level
   if (!mode || !studyCards) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8 px-4">
-        <div className="max-w-2xl mx-auto">
-          <Link href="/" className="text-white hover:text-gray-200 mb-6 inline-block">
-            ← Back to Home
-          </Link>
-          <h1 className="text-4xl font-bold text-white mb-2">📚 Study</h1>
-          <p className="text-white/70 mb-8">Choose your level and study mode</p>
+      <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
+        <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+          <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+          <h1 className="font-bold text-sm">📚 Study</h1>
+          <button onClick={toggle} className="text-lg">
+            {theme === "dark" ? "☀️" : "🌙"}
+          </button>
+        </header>
+        <div className="max-w-2xl mx-auto py-8 px-4">
+          <p className="text-gray-500 dark:text-white/50 mb-8">Choose your level and study mode</p>
 
           {/* Level Selector */}
-          <div className="bg-white rounded-2xl p-6 mb-6">
-            <h2 className="font-bold text-gray-700 mb-4">Select Level</h2>
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 mb-6">
+            <h2 className="font-bold text-gray-700 dark:text-white/80 mb-4">Select Level</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
               <button
                 onClick={() => setSelectedLevel("due")}
                 className={`p-3 rounded-xl border-2 text-sm font-bold transition ${
                   selectedLevel === "due"
-                    ? "border-orange-500 bg-orange-50 text-orange-700"
-                    : "border-gray-200 hover:border-orange-300"
+                    ? "border-orange-500 bg-orange-50 dark:bg-orange-500/20 text-orange-700 dark:text-orange-300"
+                    : "border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white/70 hover:border-orange-300"
                 }`}
               >
                 🔔 Due ({dueCount})
@@ -390,8 +394,8 @@ export default function StudyPage() {
                 onClick={() => setSelectedLevel("all")}
                 className={`p-3 rounded-xl border-2 text-sm font-bold transition ${
                   selectedLevel === "all"
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 hover:border-blue-300"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300"
+                    : "border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white/70 hover:border-blue-300"
                 }`}
               >
                 📖 All
@@ -403,7 +407,7 @@ export default function StudyPage() {
                   className={`p-3 rounded-xl border-2 text-sm font-bold transition ${
                     selectedLevel === lvl
                       ? `border-transparent text-white bg-gradient-to-r ${LEVEL_COLORS[lvl]}`
-                      : "border-gray-200 hover:border-gray-400"
+                      : "border-gray-200 dark:border-white/[0.1] text-gray-700 dark:text-white/70 hover:border-gray-400"
                   }`}
                 >
                   {lvl}
@@ -412,27 +416,27 @@ export default function StudyPage() {
               ))}
             </div>
             {selectedLevel !== "due" && selectedLevel !== "all" && (
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 dark:text-white/50 text-sm">
                 {LEVEL_DESCRIPTIONS[selectedLevel as HSKLevel]}
               </p>
             )}
           </div>
 
           {/* Mode Selector */}
-          <div className="bg-white rounded-2xl p-6 mb-6">
-            <h2 className="font-bold text-gray-700 mb-4">Study Mode</h2>
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 mb-6">
+            <h2 className="font-bold text-gray-700 dark:text-white/80 mb-4">Study Mode</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button
                 onClick={() => setMode("flashcard")}
                 className={`p-5 rounded-xl border-2 text-left transition ${
                   mode === "flashcard"
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 hover:border-blue-300"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-500/20"
+                    : "border-gray-200 dark:border-white/[0.1] hover:border-blue-300 hover:bg-gray-50 dark:hover:bg-white/[0.08]"
                 }`}
               >
                 <div className="text-3xl mb-2">🃏</div>
-                <div className="font-bold text-gray-800">Flashcards</div>
-                <div className="text-gray-500 text-sm">
+                <div className="font-bold text-gray-800 dark:text-white">Flashcards</div>
+                <div className="text-gray-500 dark:text-white/50 text-sm">
                   Flip cards, mark known or still learning
                 </div>
               </button>
@@ -440,13 +444,13 @@ export default function StudyPage() {
                 onClick={() => setMode("quiz")}
                 className={`p-5 rounded-xl border-2 text-left transition ${
                   mode === "quiz"
-                    ? "border-purple-500 bg-purple-50"
-                    : "border-gray-200 hover:border-purple-300"
+                    ? "border-purple-500 bg-purple-50 dark:bg-purple-500/20"
+                    : "border-gray-200 dark:border-white/[0.1] hover:border-purple-300 hover:bg-gray-50 dark:hover:bg-white/[0.08]"
                 }`}
               >
                 <div className="text-3xl mb-2">📝</div>
-                <div className="font-bold text-gray-800">Multiple Choice Quiz</div>
-                <div className="text-gray-500 text-sm">
+                <div className="font-bold text-gray-800 dark:text-white">Multiple Choice Quiz</div>
+                <div className="text-gray-500 dark:text-white/50 text-sm">
                   Test yourself with 4-option questions
                 </div>
               </button>
@@ -456,7 +460,7 @@ export default function StudyPage() {
           <button
             onClick={startStudy}
             disabled={!mode}
-            className="w-full bg-white text-blue-600 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+            className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
           >
             {mode ? `Start ${mode === "flashcard" ? "Flashcards" : "Quiz"} →` : "Select a mode above"}
           </button>
@@ -466,11 +470,11 @@ export default function StudyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8 px-4">
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white py-8 px-4">
       <div className="max-w-2xl mx-auto">
         <button
           onClick={handleRestart}
-          className="text-white hover:text-gray-200 mb-6 inline-block"
+          className="text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white mb-6 inline-block transition"
         >
           ← Change Settings
         </button>

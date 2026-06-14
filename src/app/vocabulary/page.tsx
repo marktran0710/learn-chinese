@@ -7,6 +7,7 @@ import { PronunciationPlayer } from "@/lib/pronunciation";
 import { loadCustomWords, saveCustomWords } from "@/lib/storage";
 import type { CustomWord } from "@/lib/storage";
 import { guessMeaning, autoPinyin } from "@/lib/guessMeaning";
+import { useTheme } from "@/lib/theme";
 
 // ── Practice Mode ─────────────────────────────────────────────────────────────
 
@@ -77,12 +78,12 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
   if (!mode) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl">
+        <div className="bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/[0.08] rounded-3xl p-8 max-w-md w-full shadow-2xl">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">🎮 Practice Mode</h2>
-            <button onClick={onExit} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
+            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">🎮 Practice Mode</h2>
+            <button onClick={onExit} className="text-gray-400 hover:text-gray-600 dark:hover:text-white text-2xl">✕</button>
           </div>
-          <p className="text-gray-500 text-sm mb-6">{words.length} words in your deck</p>
+          <p className="text-gray-500 dark:text-white/50 text-sm mb-6">{words.length} words in your deck</p>
           <div className="space-y-3">
             {([
               ["flashcard", "🃏 Flashcards", "See the Chinese, flip to reveal meaning"],
@@ -92,10 +93,10 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
               <button
                 key={type}
                 onClick={() => start(type)}
-                className="w-full text-left p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-400 hover:bg-blue-50 transition group"
+                className="w-full text-left p-4 rounded-2xl border-2 border-gray-100 dark:border-white/[0.08] hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-white/[0.08] transition group"
               >
-                <div className="font-bold text-gray-800 group-hover:text-blue-700">{title}</div>
-                <div className="text-gray-400 text-sm">{desc}</div>
+                <div className="font-bold text-gray-800 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-300">{title}</div>
+                <div className="text-gray-400 dark:text-white/40 text-sm">{desc}</div>
               </button>
             ))}
           </div>
@@ -108,22 +109,22 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
     const pct = Math.round((score.correct / total) * 100);
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
+        <div className="bg-white dark:bg-[#1a1d27] border border-gray-200 dark:border-white/[0.08] rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center">
           <div className="text-6xl mb-4">{pct >= 80 ? "🎉" : pct >= 50 ? "👍" : "💪"}</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Session Complete!</h2>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Session Complete!</h2>
           <div className="flex justify-center gap-6 my-6">
-            <div><div className="text-3xl font-black text-green-500">{score.correct}</div><div className="text-xs text-gray-400">Correct</div></div>
-            <div><div className="text-3xl font-black text-red-400">{score.wrong}</div><div className="text-xs text-gray-400">Wrong</div></div>
-            <div><div className="text-3xl font-black text-blue-500">{pct}%</div><div className="text-xs text-gray-400">Score</div></div>
+            <div><div className="text-3xl font-black text-green-500">{score.correct}</div><div className="text-xs text-gray-400 dark:text-white/40">Correct</div></div>
+            <div><div className="text-3xl font-black text-red-400">{score.wrong}</div><div className="text-xs text-gray-400 dark:text-white/40">Wrong</div></div>
+            <div><div className="text-3xl font-black text-blue-500">{pct}%</div><div className="text-xs text-gray-400 dark:text-white/40">Score</div></div>
           </div>
           <div className="flex gap-3">
             <button onClick={() => start(mode)} className="flex-1 py-2.5 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600 transition text-sm">
               Try Again
             </button>
-            <button onClick={() => setMode(null)} className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition text-sm">
+            <button onClick={() => setMode(null)} className="flex-1 py-2.5 bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-white font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/[0.12] transition text-sm">
               Change Mode
             </button>
-            <button onClick={onExit} className="flex-1 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition text-sm">
+            <button onClick={onExit} className="flex-1 py-2.5 bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-white font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/[0.12] transition text-sm">
               Exit
             </button>
           </div>
@@ -154,25 +155,25 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
       {mode === "flashcard" && current && (
         <div
           onClick={() => setFlipped((f) => !f)}
-          className="w-full max-w-lg bg-white rounded-3xl shadow-2xl p-8 text-center cursor-pointer select-none min-h-56 flex flex-col items-center justify-center"
+          className="w-full max-w-lg bg-white dark:bg-[#1a1d27] rounded-3xl shadow-2xl p-8 text-center cursor-pointer select-none min-h-56 flex flex-col items-center justify-center"
         >
           {!flipped ? (
             <>
-              <div className="text-6xl font-bold text-gray-800 mb-3">{current.chinese}</div>
+              <div className="text-6xl font-bold text-gray-800 dark:text-white mb-3">{current.chinese}</div>
               <div className="text-blue-400 text-lg">{py}</div>
-              <p className="text-gray-300 text-xs mt-4">Tap to reveal meaning</p>
+              <p className="text-gray-300 dark:text-white/30 text-xs mt-4">Tap to reveal meaning</p>
             </>
           ) : (
             <>
-              <div className="text-2xl font-bold text-gray-800 mb-2">{current.meaning}</div>
-              {current.example && <p className="text-gray-400 text-sm italic mt-2">{current.example}</p>}
+              <div className="text-2xl font-bold text-gray-800 dark:text-white mb-2">{current.meaning}</div>
+              {current.example && <p className="text-gray-400 dark:text-white/40 text-sm italic mt-2">{current.example}</p>}
               <div className="flex gap-3 mt-6">
                 <button onClick={(e) => { e.stopPropagation(); markFlashcard(false); }}
-                  className="px-6 py-2.5 bg-red-100 text-red-600 font-bold rounded-xl hover:bg-red-200 transition text-sm">
+                  className="px-6 py-2.5 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-300 font-bold rounded-xl hover:bg-red-200 dark:hover:bg-red-500/30 transition text-sm">
                   ✗ Didn&apos;t know
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); markFlashcard(true); }}
-                  className="px-6 py-2.5 bg-green-100 text-green-700 font-bold rounded-xl hover:bg-green-200 transition text-sm">
+                  className="px-6 py-2.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-300 font-bold rounded-xl hover:bg-green-200 dark:hover:bg-green-500/30 transition text-sm">
                   ✓ Got it!
                 </button>
               </div>
@@ -184,17 +185,17 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
       {/* Quiz modes */}
       {(mode === "meaning-quiz" || mode === "char-quiz") && current && (
         <div className="w-full max-w-lg">
-          <div className="bg-white rounded-3xl shadow-2xl p-8 text-center mb-4">
+          <div className="bg-white dark:bg-[#1a1d27] rounded-3xl shadow-2xl p-8 text-center mb-4">
             {mode === "meaning-quiz" ? (
               <>
-                <div className="text-6xl font-bold text-gray-800 mb-2">{current.chinese}</div>
+                <div className="text-6xl font-bold text-gray-800 dark:text-white mb-2">{current.chinese}</div>
                 <div className="text-blue-400 text-lg">{py}</div>
-                <p className="text-gray-400 text-sm mt-2">What does this mean?</p>
+                <p className="text-gray-400 dark:text-white/40 text-sm mt-2">What does this mean?</p>
               </>
             ) : (
               <>
-                <div className="text-2xl font-bold text-gray-800 mb-1">{current.meaning}</div>
-                <p className="text-gray-400 text-sm mt-1">Which character is this?</p>
+                <div className="text-2xl font-bold text-gray-800 dark:text-white mb-1">{current.meaning}</div>
+                <p className="text-gray-400 dark:text-white/40 text-sm mt-1">Which character is this?</p>
               </>
             )}
           </div>
@@ -202,12 +203,12 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
           <div className="grid grid-cols-2 gap-3">
             {choices.map((choice) => {
               const isCorrect = mode === "meaning-quiz" ? choice === current.meaning : choice === current.chinese;
-              let cls = "bg-white text-gray-800 hover:bg-blue-50 border-2 border-gray-100 hover:border-blue-300";
+              let cls = "bg-white dark:bg-white/[0.06] text-gray-800 dark:text-white hover:bg-blue-50 dark:hover:bg-white/[0.1] border-2 border-gray-100 dark:border-white/[0.08] hover:border-blue-300";
               if (picked) {
-                if (choice === picked && isCorrect) cls = "bg-green-100 text-green-800 border-2 border-green-400";
-                else if (choice === picked && !isCorrect) cls = "bg-red-100 text-red-700 border-2 border-red-400";
-                else if (isCorrect) cls = "bg-green-50 text-green-700 border-2 border-green-300";
-                else cls = "bg-white text-gray-300 border-2 border-gray-100";
+                if (choice === picked && isCorrect) cls = "bg-green-100 dark:bg-green-500/20 text-green-800 dark:text-green-300 border-2 border-green-400";
+                else if (choice === picked && !isCorrect) cls = "bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 border-2 border-red-400";
+                else if (isCorrect) cls = "bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-300 border-2 border-green-300";
+                else cls = "bg-white dark:bg-white/[0.03] text-gray-300 dark:text-white/20 border-2 border-gray-100 dark:border-white/[0.05]";
               }
               return (
                 <button key={choice} onClick={() => pickChoice(choice)}
@@ -233,6 +234,7 @@ function PracticeMode({ words, onExit }: { words: CustomWord[]; onExit: () => vo
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function VocabularyPage() {
+  const { theme, toggle } = useTheme();
   const [words, setWords] = useState<CustomWord[]>([]);
   const [formData, setFormData] = useState({ chinese: "", pinyin: "", meaning: "", example: "" });
   const [showForm, setShowForm] = useState(false);
@@ -245,7 +247,6 @@ export default function VocabularyPage() {
 
   useEffect(() => {
     const raw = loadCustomWords();
-    // Auto-fill any words with empty meaning or pinyin
     let changed = false;
     const filled = raw.map((w) => {
       const updates: Partial<CustomWord> = {};
@@ -301,28 +302,34 @@ export default function VocabularyPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8">
-        <div className="container"><p className="text-white">Loading…</p></div>
+      <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] flex items-center justify-center">
+        <p className="text-gray-500 dark:text-white/50">Loading…</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8">
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
       {practicing && words.length > 0 && (
         <PracticeMode words={words} onExit={() => setPracticing(false)} />
       )}
 
-      <div className="container">
-        <Link href="/" className="text-white hover:text-gray-200 mb-8 inline-block text-lg">← Back to Home</Link>
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+        <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+        <h1 className="font-bold text-sm">📚 My Words</h1>
+        <button onClick={toggle} className="text-lg">
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+      </header>
 
+      <div className="container py-8">
         <div className="flex justify-between items-center mb-6 flex-wrap gap-3">
-          <h1 className="text-4xl font-bold text-white">📚 My Words</h1>
+          <h2 className="text-3xl font-bold">My Words</h2>
           <div className="flex gap-2 flex-wrap">
-            <Link href="/import-doc" className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl font-medium transition text-sm">
+            <Link href="/import-doc" className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] hover:bg-gray-50 dark:hover:bg-white/[0.1] text-gray-700 dark:text-white px-4 py-2 rounded-xl font-medium transition text-sm">
               📄 Doc Import
             </Link>
-            <Link href="/import" className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-xl font-medium transition text-sm">
+            <Link href="/import" className="bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.08] hover:bg-gray-50 dark:hover:bg-white/[0.1] text-gray-700 dark:text-white px-4 py-2 rounded-xl font-medium transition text-sm">
               📥 File Import
             </Link>
             {words.length > 0 && (
@@ -331,7 +338,7 @@ export default function VocabularyPage() {
                 🎮 Practice ({words.length})
               </button>
             )}
-            <button onClick={() => setShowForm(!showForm)} className="bg-white text-blue-700 hover:bg-blue-50 px-4 py-2 rounded-xl font-bold transition text-sm">
+            <button onClick={() => setShowForm(!showForm)} className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-90 px-4 py-2 rounded-xl font-bold transition text-sm">
               {showForm ? "✕ Cancel" : "+ Add Word"}
             </button>
           </div>
@@ -339,32 +346,32 @@ export default function VocabularyPage() {
 
         {/* Add Word Form */}
         {showForm && (
-          <div className="bg-white rounded-2xl p-6 mb-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4 text-gray-800">Add New Word</h2>
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 mb-6 shadow-lg">
+            <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">Add New Word</h2>
             <form onSubmit={handleAddWord} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Chinese *</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-white/50 mb-1 uppercase">Chinese *</label>
                 <input type="text" placeholder="龍" value={formData.chinese}
                   onChange={(e) => setFormData({ ...formData, chinese: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-2xl" maxLength={10} />
+                  className="w-full p-3 bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl focus:outline-none focus:border-blue-500 text-2xl" maxLength={10} />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Pinyin (auto if blank)</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-white/50 mb-1 uppercase">Pinyin (auto if blank)</label>
                 <input type="text" placeholder="lóng" value={formData.pinyin}
                   onChange={(e) => setFormData({ ...formData, pinyin: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+                  className="w-full p-3 bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl focus:outline-none focus:border-blue-500" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Meaning *</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-white/50 mb-1 uppercase">Meaning *</label>
                 <input type="text" placeholder="dragon" value={formData.meaning}
                   onChange={(e) => setFormData({ ...formData, meaning: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+                  className="w-full p-3 bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl focus:outline-none focus:border-blue-500" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1 uppercase">Example (optional)</label>
+                <label className="block text-xs font-semibold text-gray-500 dark:text-white/50 mb-1 uppercase">Example (optional)</label>
                 <input type="text" placeholder="中國的龍很重要。" value={formData.example}
                   onChange={(e) => setFormData({ ...formData, example: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+                  className="w-full p-3 bg-white dark:bg-white/[0.06] border-2 border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl focus:outline-none focus:border-blue-500" />
               </div>
               <div className="sm:col-span-2">
                 <button type="submit" className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition">
@@ -380,68 +387,68 @@ export default function VocabularyPage() {
           <div className="mb-5">
             <input type="text" placeholder="Search words, pinyin, or meaning…" value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white/15 text-white placeholder:text-white/40 rounded-xl px-4 py-3 border border-white/20 focus:outline-none focus:border-yellow-400 text-sm" />
+              className="w-full bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-white/30 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 text-sm" />
           </div>
         )}
 
         {/* Words Grid */}
         {words.length === 0 ? (
-          <div className="bg-white rounded-2xl text-center py-16 shadow-lg">
-            <p className="text-gray-500 text-xl mb-4">No words yet</p>
-            <p className="text-gray-400 text-sm mb-6">Import a document or add words manually</p>
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl text-center py-16 shadow-lg">
+            <p className="text-gray-500 dark:text-white/50 text-xl mb-4">No words yet</p>
+            <p className="text-gray-400 dark:text-white/40 text-sm mb-6">Import a document or add words manually</p>
             <div className="flex justify-center gap-3">
               <Link href="/import-doc" className="px-5 py-2.5 bg-blue-500 text-white font-bold rounded-xl hover:bg-blue-600 transition text-sm">📄 Doc Import</Link>
               <button onClick={() => setShowForm(true)} className="px-5 py-2.5 bg-purple-500 text-white font-bold rounded-xl hover:bg-purple-600 transition text-sm">+ Add Word</button>
             </div>
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-white/50 text-center py-12">No words match &quot;{search}&quot;</p>
+          <p className="text-gray-500 dark:text-white/50 text-center py-12">No words match &quot;{search}&quot;</p>
         ) : (
           <>
-            <p className="text-white/50 text-xs mb-3">{filtered.length} of {words.length} words</p>
+            <p className="text-gray-500 dark:text-white/50 text-xs mb-3">{filtered.length} of {words.length} words</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.map((word) => (
-                <div key={word.id} className="bg-white rounded-2xl shadow-sm p-5 relative">
+                <div key={word.id} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl shadow-sm p-5 relative">
                   <div className="absolute top-3 right-3 flex gap-1">
-                    <button onClick={() => startEdit(word)} className="w-7 h-7 rounded-full bg-gray-100 hover:bg-blue-100 text-gray-400 hover:text-blue-600 flex items-center justify-center text-xs transition" title="Edit">✎</button>
-                    <button onClick={() => handleDelete(word.id)} className="w-7 h-7 rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 flex items-center justify-center text-xs transition" title="Delete">✕</button>
+                    <button onClick={() => startEdit(word)} className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/[0.08] hover:bg-blue-100 dark:hover:bg-blue-500/20 text-gray-400 hover:text-blue-600 flex items-center justify-center text-xs transition" title="Edit">✎</button>
+                    <button onClick={() => handleDelete(word.id)} className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/[0.08] hover:bg-red-100 dark:hover:bg-red-500/20 text-gray-400 hover:text-red-500 flex items-center justify-center text-xs transition" title="Delete">✕</button>
                   </div>
 
-                  <div className="text-5xl font-bold text-gray-800 mb-1 leading-none">{word.chinese}</div>
-                  <div className="text-purple-500 font-medium mb-1">{word.pinyin || pinyin(word.chinese, { toneType: "symbol", type: "string" })}</div>
+                  <div className="text-5xl font-bold text-gray-800 dark:text-white mb-1 leading-none">{word.chinese}</div>
+                  <div className="text-purple-500 dark:text-purple-400 font-medium mb-1">{word.pinyin || pinyin(word.chinese, { toneType: "symbol", type: "string" })}</div>
 
                   {editId === word.id ? (
                     <div className="mt-2 space-y-2">
                       <input value={editData.meaning} onChange={(e) => setEditData({ ...editData, meaning: e.target.value })}
-                        placeholder="Meaning" className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400" />
+                        placeholder="Meaning" className="w-full text-sm bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400" />
                       <input value={editData.example} onChange={(e) => setEditData({ ...editData, example: e.target.value })}
-                        placeholder="Example sentence" className="w-full text-sm border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400" />
+                        placeholder="Example sentence" className="w-full text-sm bg-white dark:bg-white/[0.06] border border-gray-200 dark:border-white/[0.1] text-gray-900 dark:text-white rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-400" />
                       <div className="flex gap-2">
                         <button onClick={() => commitEdit(word.id)} className="flex-1 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-lg hover:bg-blue-600 transition">Save</button>
-                        <button onClick={() => setEditId(null)} className="flex-1 py-1.5 bg-gray-100 text-gray-600 text-xs font-bold rounded-lg hover:bg-gray-200 transition">Cancel</button>
+                        <button onClick={() => setEditId(null)} className="flex-1 py-1.5 bg-gray-100 dark:bg-white/[0.08] text-gray-600 dark:text-white text-xs font-bold rounded-lg hover:bg-gray-200 dark:hover:bg-white/[0.12] transition">Cancel</button>
                       </div>
                     </div>
                   ) : (
                     <>
                       {word.meaning ? (
-                        <div className="text-gray-700 text-sm mb-2">{word.meaning}</div>
+                        <div className="text-gray-700 dark:text-white/80 text-sm mb-2">{word.meaning}</div>
                       ) : (
                         <button onClick={() => startEdit(word)} className="text-orange-400 text-xs underline mb-2">Add meaning →</button>
                       )}
                       {word.example && (
-                        <div className="bg-gray-50 rounded-xl p-2.5 mb-3 text-xs text-gray-500 italic">{word.example}</div>
+                        <div className="bg-gray-50 dark:bg-white/[0.03] rounded-xl p-2.5 mb-3 text-xs text-gray-500 dark:text-white/50 italic">{word.example}</div>
                       )}
                     </>
                   )}
 
                   <div className="flex gap-2 mt-3">
                     <button onClick={() => handlePlay(word.id, word.chinese)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition ${playingId === word.id ? "bg-red-500 text-white" : "bg-blue-100 text-blue-700 hover:bg-blue-200"}`}>
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition ${playingId === word.id ? "bg-red-500 text-white" : "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-500/30"}`}>
                       {playingId === word.id ? "⏹ Stop" : "🔊 Listen"}
                     </button>
                   </div>
 
-                  <div className="text-xs text-gray-300 mt-2">{word.createdAt}</div>
+                  <div className="text-xs text-gray-300 dark:text-white/20 mt-2">{word.createdAt}</div>
                 </div>
               ))}
             </div>

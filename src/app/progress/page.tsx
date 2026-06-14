@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ProgressBar } from "@/components/ProgressBar";
 import { loadCompletedLessons, loadCustomWords } from "@/lib/storage";
+import { useTheme } from "@/lib/theme";
 
 export default function ProgressPage() {
+  const { theme, toggle } = useTheme();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
   const [wordCount, setWordCount] = useState(0);
 
@@ -71,61 +73,62 @@ export default function ProgressPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 py-8">
-      <div className="container">
-        <Link
-          href="/"
-          className="text-white hover:text-gray-200 mb-8 inline-block text-lg"
-        >
-          ← Back to Home
-        </Link>
+    <main className="min-h-screen bg-slate-100 dark:bg-[#0f1117] text-gray-900 dark:text-white">
+      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#0f1117]/80 backdrop-blur border-b border-gray-200 dark:border-white/[0.06] px-4 py-3 flex items-center justify-between gap-4">
+        <Link href="/" className="text-sm text-gray-500 dark:text-white/60 hover:text-gray-900 dark:hover:text-white transition">← Home</Link>
+        <h1 className="font-bold text-sm">📊 Progress</h1>
+        <button onClick={toggle} className="text-lg">
+          {theme === "dark" ? "☀️" : "🌙"}
+        </button>
+      </header>
 
-        <h1 className="text-5xl font-bold text-white mb-8">📊 Your Progress</h1>
+      <div className="container py-8">
+        <h2 className="text-4xl font-bold mb-8">📊 Your Progress</h2>
 
         {/* Overall Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="card text-center">
-            <div className="text-4xl font-bold text-blue-600">
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 text-center shadow-sm">
+            <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">
               {totalLessons}
             </div>
-            <p className="text-gray-600">Lessons Completed</p>
+            <p className="text-gray-600 dark:text-white/60">Lessons Completed</p>
           </div>
-          <div className="card text-center">
-            <div className="text-4xl font-bold text-purple-600">
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 text-center shadow-sm">
+            <div className="text-4xl font-bold text-purple-600 dark:text-purple-400">
               {Math.min(totalLessons, 30)}
             </div>
-            <p className="text-gray-600">Day Streak</p>
+            <p className="text-gray-600 dark:text-white/60">Day Streak</p>
           </div>
-          <div className="card text-center">
-            <div className="text-4xl font-bold text-pink-600">{xpPoints}</div>
-            <p className="text-gray-600">XP Points</p>
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 text-center shadow-sm">
+            <div className="text-4xl font-bold text-pink-600 dark:text-pink-400">{xpPoints}</div>
+            <p className="text-gray-600 dark:text-white/60">XP Points</p>
           </div>
-          <div className="card text-center">
-            <div className="text-4xl font-bold text-green-600">
+          <div className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 text-center shadow-sm">
+            <div className="text-4xl font-bold text-green-600 dark:text-green-400">
               {
                 achievements.filter(
                   (item) => item.description.includes("unlock") === false,
                 ).length
               }
             </div>
-            <p className="text-gray-600">Achievements</p>
+            <p className="text-gray-600 dark:text-white/60">Achievements</p>
           </div>
         </div>
 
         {/* Skill Progress */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           {stats.map((stat) => (
-            <div key={stat.skill} className="card">
+            <div key={stat.skill} className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-6 shadow-sm">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-800">
+                <h3 className="text-xl font-bold text-gray-800 dark:text-white capitalize">
                   {stat.skill}
                 </h3>
-                <span className="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                <span className="text-sm bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 px-3 py-1 rounded-full">
                   {stat.lessons}
                 </span>
               </div>
               <ProgressBar progress={stat.progress} />
-              <div className="mt-4 text-sm text-gray-600">
+              <div className="mt-4 text-sm text-gray-600 dark:text-white/60">
                 🔥 {stat.streak} | Last activity: Today
               </div>
             </div>
@@ -134,20 +137,20 @@ export default function ProgressPage() {
 
         {/* Achievements */}
         <div>
-          <h2 className="text-3xl font-bold text-white mb-6">
+          <h2 className="text-3xl font-bold mb-6">
             🏆 Achievements
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {achievements.map((achievement, index) => (
               <div
                 key={index}
-                className="card text-center opacity-75 hover:opacity-100 transition"
+                className="bg-white dark:bg-white/[0.04] border border-gray-200 dark:border-white/[0.08] rounded-2xl p-5 text-center opacity-75 hover:opacity-100 transition shadow-sm"
               >
                 <div className="text-4xl mb-2">{achievement.icon}</div>
-                <h4 className="font-bold text-gray-800 mb-1">
+                <h4 className="font-bold text-gray-800 dark:text-white mb-1">
                   {achievement.title}
                 </h4>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-white/60">
                   {achievement.description}
                 </p>
               </div>
