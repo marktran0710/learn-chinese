@@ -50,14 +50,18 @@ function matchVocabInText(chineseText: string): VocabEntry[] {
   return Array.from(found.values()).sort((a, b) => a.traditional.localeCompare(b.traditional));
 }
 
-function extractUnknownItems(chineseText: string): UnknownItem[] {
+function extractUnknownItems(rawText: string): UnknownItem[] {
   const knownSet = new Set(TOCFL_VOCAB.map((w) => w.traditional));
   const freq = new Map<string, number>();
-  for (let len = 1; len <= 4; len++) {
-    for (let i = 0; i <= chineseText.length - len; i++) {
-      const gram = chineseText.slice(i, i + len);
-      if (!/^[一-鿿㐀-䶿豈-﫿]+$/.test(gram) || knownSet.has(gram)) continue;
-      freq.set(gram, (freq.get(gram) ?? 0) + 1);
+  // Split on non-Chinese so n-grams never cross punctuation or spaces
+  const segments = rawText.match(/[一-鿿㐀-䶿豈-﫿]+/g) ?? [];
+  for (const seg of segments) {
+    for (let len = 1; len <= 4; len++) {
+      for (let i = 0; i <= seg.length - len; i++) {
+        const gram = seg.slice(i, i + len);
+        if (knownSet.has(gram)) continue;
+        freq.set(gram, (freq.get(gram) ?? 0) + 1);
+      }
     }
   }
   const items = Array.from(freq.entries())
@@ -160,7 +164,7 @@ function ExtractTab() {
     setChineseText(ct);
     const known = matchVocabInText(ct);
     setKnownWords(known);
-    setUnknownItems(extractUnknownItems(ct));
+    setUnknownItems(extractUnknownItems(text));
     setTab("known");
   }
 
@@ -174,7 +178,7 @@ function ExtractTab() {
       const ct = data.chineseText ?? "";
       setChineseText(ct); setRawText(data.text ?? ""); setFileName(file.name);
       const known = matchVocabInText(ct);
-      setKnownWords(known); setUnknownItems(extractUnknownItems(ct)); setTab("known");
+      setKnownWords(known); setUnknownItems(extractUnknownItems(data.text ?? "")); setTab("known");
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
     finally { setLoading(false); }
   }, []);
