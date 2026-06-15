@@ -82,6 +82,7 @@ export default function Home() {
                 {[
                   ["/study",      "🃏", "Flashcard Study"],
                   ["/vocabulary", "📝", "My Words"],
+                  ["/dictionary", "📖", "Dictionary"],
                   ["/import",     "📥", "Import"],
                 ].map(([href, icon, label]) => (
                   <Link key={href as string} href={href as string} className={navLinkClass}>
@@ -161,6 +162,7 @@ export default function Home() {
             <div className="flex gap-1 text-sm">
               <Link href="/study"      className="px-2 py-1 rounded-lg text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">🃏</Link>
               <Link href="/vocabulary" className="px-2 py-1 rounded-lg text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">📝</Link>
+              <Link href="/dictionary" className="px-2 py-1 rounded-lg text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">📖</Link>
               <Link href="/import"     className="px-2 py-1 rounded-lg text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">📥</Link>
               <Link href="/b1-book"    className="px-2 py-1 rounded-lg text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">📗</Link>
               <Link href="/progress"   className="px-2 py-1 rounded-lg text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition">📊</Link>
@@ -229,6 +231,7 @@ export default function Home() {
                 {[
                   { href:"/study",      icon:"🃏", title:"Flashcard Study",   sub:`${TOCFL_VOCAB.length} words · spaced repetition`, accent:"from-sky-500/20 to-blue-600/20",    border:"border-sky-500/30",   badge: dueCount > 0 ? `${dueCount} due` : "" },
                   { href:"/vocabulary", icon:"📝", title:"My Words",          sub:`${wordCount} saved · practice & edit`,             accent:"from-violet-500/20 to-purple-600/20", border:"border-violet-500/30", badge:"" },
+                  { href:"/dictionary", icon:"📖", title:"Dictionary",        sub:"Search TOCFL · pinyin · English",                  accent:"from-amber-500/20 to-yellow-600/20", border:"border-amber-500/30",  badge:"" },
                   { href:"/import",     icon:"📥", title:"Import Vocabulary", sub:"PDF · DOCX · TXT · paste text",                   accent:"from-indigo-500/20 to-blue-700/20",  border:"border-indigo-500/30", badge:"" },
                 ].map((c) => (
                   <Link key={c.href} href={c.href}
